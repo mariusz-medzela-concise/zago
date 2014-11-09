@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app">
+<head>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
+    <link rel="icon" type="image/png" href="images/favicon.ico">
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/jquery-1.8.3.min.js"></script>
+    <script src="js/modernizr.js"></script> <!-- Scipt to test and detect browser compatability -->
+    <script src="js/mobile-detect.min.js"></script> <!-- Script to detect whether mobile/touch device -->
+    <script src="js/mobile-detect-modernizr.js"></script> <!-- Integration w/ modernizr script -->
+    <script src="js/modernizr-script.js"></script> <!-- Custom modernizr code logic -->
+    <script src="js/angular.min.js"></script>
+    <script src="js/angular-ui-router.min.js"></script>
+    <script src="js/angular-sanitize.min.js"></script>
+    <script src="js/main.js"></script> <!-- Angular Application -->
+    <script src="js/templates.js"></script> <!-- Template caching -->
+    <script type="text/javascript" src="js/overthrow.min.js"></script> <!-- Mobile touch scrolling plugin -->
+</head>
+
+<body ng-controller="AppCtrl">
+    <div id="container" ng-show="!isLoading && pageReady">
+
+        <img id="siteID" src="images/zago_logo.png" ng-click="route('home', true)">
+
+        <nav id="mainNav" ng-controller="HeaderCtrl">
+            <div id="menuWrapper" class="overthrow">
+                <div id="menu">
+                    <ul>
+                        <li>
+                            <a ng-click="route('home')">Zago</a>
+                        </li>
+                        <li>
+                            <a ng-click="route('projects')">Projects</a>
+                        </li>
+                        <li>
+                            <a ng-click="route('team')">Team</a>
+                        </li>
+                        <li>
+                            <a ng-click="route('love')">Love</a> <!-- href="http://zagolovesyou.tumblr.com" target="_blank" -->
+                        </li>
+                    </ul>
+                </div>
+                <div id="menuContacts" office-list></div>
+            </div>
+        </nav>
+
+        <div class="buttonWrapper">
+            <p id="menuPrompt">Click for<br>Menu</p>
+            <button id="menuButton" type="button" ng-click="toggleMenu()"></button>
+        </div>
+
+        <button id="scrollTop" type="button" ng-click="scrollTop()"></button>
+
+        <div id="pageContent" class="{{pageView}}" ui-view autoscroll="true"><!-- Angular Partials go here --></div>
+
+        <footer  id="footerContacts">
+            <div office-list></div>
+            <section class="intern">
+                <p>We take interns in NYC for
+                3 to 6 month engagements.<br>Inquire at </p>
+                <a href="mailto:intern@zagollc.com">intern@zagollc.com</a>
+            </section>
+            <section class="social" social-buttons></section>
+        </footer>
+    </div>    
+    <script src="http://localhost:35729/livereload.js"></script> <!-- Grunt livereload command -->
+</body>
+</html>

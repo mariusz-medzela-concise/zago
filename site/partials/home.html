@@ -1,0 +1,31 @@
+<div id="heroBanner" ng-style="{'background-image':'url('+hero.content.image_url+')'}">
+	<img ng-src="{{hero.content.image_url}}">
+	<h1>Zago</h1>
+	<p ng-bind-html="hero.content.image_caption"></p>
+</div>
+
+<div id="homeBlurb">
+	<div ng-bind-html="blurb.body"></div>
+	<ul>
+		<li ng-repeat="word in blurb.content.power_words">{{word}}</li>
+	</u>
+</div>
+
+
+<div id="homeSections">
+	<div class="section" ng-repeat="section in sections | orderBy:'order'">
+		<div class="bannerWrapper">
+			<img ng-src="{{section.content.image_url}}">
+			<p ng-bind-html="section.content.image_caption"></p>
+		</div>
+		<div class="sectionWrapper">
+			<h1>{{section.title}}</h1>
+			<div class="sectionText" ng-bind-html="section.body"></div>
+			<!-- <div class="sectionAside">
+				<ul>
+					<li ng-repeat="word in section.content.keywords" ng-bind-html="word"></li>
+				</ul>
+			</div> -->
+		</div>
+	</div>
+</div>

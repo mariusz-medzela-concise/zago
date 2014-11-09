@@ -1,0 +1,11 @@
+<section ng-repeat="office in offices">
+    <h2 ng-bind-html="office.location"></h2>
+    <p ng-bind-html="office.address"></p>
+    <p ng-bind-html="office.region"></p>
+    <p ng-bind-html="'P: '+office.phone"></p>
+</section>
+<section class="info">
+    <p>Say ciao.
+    Email us at </p>
+    <a href="mailto:info@zagollc.com">info@zagollc.com</a>
+</section>
