@@ -343,6 +343,7 @@ footer {
 
 #loader {
 	position: fixed;
+	backface-visibility: hidden;
 	top: 0; left: 0;
 	width: 100%;
 	height: 100%;
@@ -403,6 +404,7 @@ footer {
 
 img.siteID {
 	position: fixed;
+	backface-visibility: hidden;
 	top: 0; left: 0;
 	z-index: 1000;
 	width: 50px;
@@ -411,6 +413,7 @@ img.siteID {
 
 .buttonWrapper {
 	position: fixed;
+	backface-visibility: hidden;
 	top: 78vh;
 	right: 50%;
 	@include translate(50%);
@@ -475,6 +478,7 @@ button {
 			background-color: white; } }
 	&#scrollTop {
 		position: fixed;
+		backface-visibility: hidden;
 		bottom: 0; right: 0;
 		z-index: 500;
 		padding: 0;
@@ -507,6 +511,7 @@ nav {
 		min-height: 100em;
 		min-height: 100vh;
 		position: fixed;
+		backface-visibility: hidden;
 		top: 0; right: -100%;
 		z-index: 800;
 		background: black;
@@ -560,6 +565,7 @@ nav {
 	}
 	&#projectNav {
 		position: fixed;
+		backface-visibility: hidden;
 		top: 50%; left: 0;
 		/*@include translate(0, -50%);*/
 		width: 50px;
@@ -630,6 +636,7 @@ nav {
 		display: none;
 		&.pinned {
 			position: fixed;
+			backface-visibility: hidden;
 			top: 0; left: 0; bottom: initial;
 			z-index: 500;
 		}

@@ -511,6 +511,7 @@ footer.lovePage {
 
 #loader {
   position: fixed;
+  backface-visibility: hidden;
   top: 0;
   left: 0;
   width: 100%;
@@ -572,6 +573,7 @@ footer.lovePage {
 /*************************************************/
 img.siteID {
   position: fixed;
+  backface-visibility: hidden;
   top: 0;
   left: 0;
   z-index: 1000;
@@ -582,6 +584,7 @@ img.siteID {
 
 .buttonWrapper {
   position: fixed;
+  backface-visibility: hidden;
   top: 78vh;
   right: 50%;
   -webkit-transform: translate(50%, 0);
@@ -684,6 +687,7 @@ button#menuButton.menu-open {
 }
 button#scrollTop {
   position: fixed;
+  backface-visibility: hidden;
   bottom: 0;
   right: 0;
   z-index: 500;
@@ -719,6 +723,7 @@ nav#mainNav {
   min-height: 100em;
   min-height: 100vh;
   position: fixed;
+  backface-visibility: hidden;
   top: 0;
   right: -100%;
   z-index: 800;
@@ -819,6 +824,7 @@ nav#mainNav #menuWrapper #menu ul li a {
 }
 nav#projectNav {
   position: fixed;
+  backface-visibility: hidden;
   top: 50%;
   left: 0;
   /*@include translate(0, -50%);*/
@@ -910,6 +916,7 @@ nav#sectionNav {
 }
 nav#sectionNav.pinned {
   position: fixed;
+  backface-visibility: hidden;
   top: 0;
   left: 0;
   bottom: initial;

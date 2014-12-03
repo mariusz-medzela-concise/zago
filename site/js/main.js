@@ -76,13 +76,13 @@ app.run(function($rootScope, $state, SiteLoader, Storage, Functions, $window) {
         
         // If the Site Data is missing, stop navigation and retreive data
         // Cache timer for Storage (24hrs: 86400000 1hr: 3600000 1min: 60000)
+        //////////////////////////////////////////////////////////////////////////
         var newTimestamp = new Date().getTime();
         // Set Time of User Entry (default to 24hr reset)
         Storage.dailyTimestamp = (Storage.dailyTimestamp && Storage.dailyTimestamp > (newTimestamp - 86400000)) ? Storage.dailyTimestamp : newTimestamp;
         // If the Storage Site object is empty or older than X, reload Wordpress data tree (default to 1hr reset)
         if (!Storage.site || !Storage.dataTimestamp || (Storage.dataTimestamp < newTimestamp - 3600000)) {
             event.preventDefault();
-            $rootScope.pageReady = false;
             SiteLoader.getRawData().then(function(data){
                 var site, posts;
                 // If object returned is some fucked up IE shit (ie String), parse it
@@ -101,19 +101,11 @@ app.run(function($rootScope, $state, SiteLoader, Storage, Functions, $window) {
 
         // Remove page-specific event listeners
         Functions.removeListeners();
-
-        // Functions.toggleMenu(true);
         
     });
 
     $rootScope.$on( "$stateChangeSuccess", function(event, to, toParams, from, fromParams) {
         
-        if ($rootScope.functionQue) { $rootScope.functionQue(); }
-        
-        $rootScope.functionQue = null;
-        $rootScope.previousState = from.name;
-        $rootScope.thisState = to.name;
-        $rootScope.pageReady = true;
         $rootScope.isRouting = false;
 
         // Add/Remove page class to footer element
@@ -702,6 +694,8 @@ app.factory("Preloader", function( $q, $rootScope, Storage ) {
 
 app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $document, $timeout ) {
 
+    console.log('Factory: Compiling "Functions"');
+
     // Data Elements
     ////////////////////////////////////////////////////////////////
     var eventListeners = [];
@@ -793,7 +787,7 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
             dom.menuBtn.style.display = 'none';
             dom.prompt.style.display = 'none';
             dom.footer.style.display = 'none';
-        },
+            },
 
         'preloadImages' : function(posts, src) {
             if (posts.images && !posts.preloaded) {
@@ -808,14 +802,6 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
                 Storage.site = JSON.stringify(site);
                 console.log(JSON.parse(Storage.site));
             }
-        },
-
-        'removeListeners' : function(){
-                var arr = eventListeners;
-                for (var i = 0; arr.length > i; i++) {
-                    arr[i].obj.removeEventListener(arr[i].evt, arr[i].func, arr[i].bub)
-                };
-                eventListeners = [];
             },
 
         'route' : function(route, turnOff, params) {
@@ -830,9 +816,19 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
                 // If route is same as current view, scrollTop()
                 } else { this.scrollTop(); }
             },
-        
+
+        'removeListeners' : function(){
+                var arr = eventListeners;
+                for (var i = 0; arr.length > i; i++) {
+                    arr[i].obj.removeEventListener(arr[i].evt, arr[i].func, arr[i].bub)
+                };
+                eventListeners = [];
+            },
+
+        // Set page-specific event listener's
+        //(removed @ $stateChangeStart by Functions.removeListeners)
         'setListener' : function(obj, evt, func, bub){
-                obj.addEventListener(evt, func);
+                obj.addEventListener(evt, func, bub);
                 eventListeners.push({
                     'obj' : obj,
                     'evt' : evt,
@@ -842,6 +838,7 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
             },
 
         'showScroll' : function() {
+                // @BUG doesn't show unless scrolled FROM hidden position
                 if (window.pageYOffset > 200) { dom.scrollTopBtn.classList.add('show'); }
                 else { dom.scrollTopBtn.classList.remove('show'); }
             },
@@ -925,8 +922,8 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
                 this.route('project', true, {'project':id});
             },
         'testFunction' : function(test){
-            console.log(test || 'test');
-        }
+                console.log(test || 'test');
+            }
     }
 });
 
@@ -1224,12 +1221,10 @@ app.directive('underZ', function() {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-app.controller('AppCtrl', function($scope, Functions, Storage){
+app.controller('AppCtrl', function($scope, $rootScope, Functions, Storage){
 
-    $scope.test = function() {
-        console.logf('testing');
-    };
-
+    // App-general Functions
+    ////////////////////////////////////////////////////////////////////////////////////
     $scope.route = Functions.route;
     $scope.toggleMenu = Functions.toggleMenu;
     $scope.viewProject = Functions.viewProject;
@@ -1245,7 +1240,6 @@ app.controller('AppCtrl', function($scope, Functions, Storage){
 
     // Splash Page configuration
     ////////////////////////////////////////////////////////////////////////////////////
-
     (function splashPage() {
         // If first time visiting site via mobile, flash splashpage
         if (!Storage.splashed && (Modernizr.phone)) {
@@ -1254,15 +1248,14 @@ app.controller('AppCtrl', function($scope, Functions, Storage){
         }
     })();
 
+    // Button to hide splash page and show full site
     $scope.hideSplash = function() {
         Storage.splashed = true;
         $scope.showSplash = false;
         Functions.disableScroll(false);
     };
 
-});
-
-app.controller('HeaderCtrl', function($scope, $rootScope, $state, Storage){
+    console.log($rootScope);
 
 });
 
@@ -1271,12 +1264,10 @@ app.controller('HomeCtrl', function($scope, $rootScope, $timeout, $interval, Fun
     $rootScope.pageView = "homePage";
 
     var posts = JSON.parse(Storage.site).home;
-
     $scope.hero = posts.banners[0];
     $scope.blurb = posts.blurb[0];
     $scope.sections = posts.sections;
 
-    // Functions.preloadImages(posts, 'home');
     Preloader.preload(posts.images);
 
 
@@ -1358,9 +1349,9 @@ app.controller('HomeCtrl', function($scope, $rootScope, $timeout, $interval, Fun
         var elems = document.getElementById('heroBanner').children;
         var images = [];
         // Get IMG Tags
-        for (var i = 0; elems.length > i; i++) {
-            if (elems[i].tagName == 'IMG') {
-                images.push(elems[i]);
+        for (var r = 0; elems.length > r; r++) {
+            if (elems[r].tagName == 'IMG') {
+                images.push(elems[r]);
         }   }
 
         var waitTiming = 4000; // how long each slide remains active
@@ -1383,7 +1374,6 @@ app.controller('ProjectsCtrl', function($scope, $rootScope, Storage, Preloader, 
     $rootScope.pageView = "projectsOverviewPage";
 
     var posts = JSON.parse(Storage.site).project;
-
     $scope.blurb = posts.blurb[0];
     $scope.projects = posts.projects;
 
@@ -1407,35 +1397,39 @@ app.controller('ProjectDetailCtrl', function($scope, $rootScope, $stateParams, S
 
     var posts = JSON.parse(Storage.site).project;
 
-    // Get CURRENT, NEXT & PERVIOUS project IDs based on SITE TREE position
-    for (var i = 0; posts.projects.length > i; i++) {
-        if (posts.projects[i].id == $stateParams.project) {
-            $scope.project = posts.projects[i];
-            if (i == 0) { // If THIS project is the first one
-                $scope.nextProject = posts.projects[(i+1)];
-                $scope.prevProject = posts.projects[(posts.projects.length-1)];
-            } else if (i == (posts.projects.length - 1)) { // If THIS project is the last one
-                $scope.nextProject = posts.projects[(0)];
-                $scope.prevProject = posts.projects[(i-1)];
-            } else { // If THIS project is any of the interior ones
-                $scope.nextProject = posts.projects[(i+1)];
-                $scope.prevProject = posts.projects[(i-1)];
-            }
-
-            // if there are less than 3 projects in the site tree
-            if (posts.projects.length < 3) {
-                if (i == 0) {
-                    $scope.nextProject = posts.projects[(1)];
-                    $scope.prevProject = posts.projects[(0)]; }
-                else {
+    // Get CURRENT, NEXT & PERVIOUS project IDs based on SITE TREE position (Project Sub-Nav)
+    ////////////////////////////////////////////////////////////////////////////////////
+    (function setProjectNavigation(){
+        for (var i = 0; posts.projects.length > i; i++) {
+            if (posts.projects[i].id == $stateParams.project) {
+                $scope.project = posts.projects[i];
+                if (i == 0) { // If THIS project is the first one
+                    $scope.nextProject = posts.projects[(i+1)];
+                    $scope.prevProject = posts.projects[(posts.projects.length-1)];
+                } else if (i == (posts.projects.length - 1)) { // If THIS project is the last one
                     $scope.nextProject = posts.projects[(0)];
-                    $scope.prevProject = posts.projects[(1)]; }
-            }
+                    $scope.prevProject = posts.projects[(i-1)];
+                } else { // If THIS project is any of the interior ones
+                    $scope.nextProject = posts.projects[(i+1)];
+                    $scope.prevProject = posts.projects[(i-1)];
+                }
 
-            break;
-    }   }
+                // if there are less than 3 projects in the site tree
+                if (posts.projects.length < 3) {
+                    if (i == 0) {
+                        $scope.nextProject = posts.projects[(1)];
+                        $scope.prevProject = posts.projects[(0)]; }
+                    else {
+                        $scope.nextProject = posts.projects[(0)];
+                        $scope.prevProject = posts.projects[(1)]; }
+                }
+
+                break;
+        }   }
+    })();
 
     // Redirect back to projects overview page if project or site tree doesn't exist, else preload images
+    ////////////////////////////////////////////////////////////////////////////////////
     if (!$scope.project) { $scope.route('projects', true); }
     else { Preloader.preload($scope.project.content.images); }
 
@@ -1448,6 +1442,7 @@ app.controller('TeamCtrl', function($scope, $rootScope, Preloader, Storage){
     var posts = JSON.parse(Storage.site).team;
     $scope.blurb = posts.blurb[0];
     $scope.members = posts.members.shuffle();
+
     Preloader.preload(posts.images);
 
 });
