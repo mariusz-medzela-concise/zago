@@ -18,7 +18,7 @@ module.exports = function(grunt) {
 		ngtemplates:  {
 			app:        {
 				cwd: 'site',
-				src:      ['**.html','pieces/**.html','partials/**.html'],
+				src:      ['*.html','pieces/*.html','partials/*.html'],
 				dest:     'site/js/templates.js',
 				options:  {
 					htmlmin: {
@@ -43,7 +43,7 @@ module.exports = function(grunt) {
 				tasks: []
 			},
 			sass: {
-				files: ['components/sass/style.scss', 'components/sass/touchscreens.scss'],
+				files: ['components/sass/*.scss'],
 				tasks: ['compass:dev']
 			},
 			html: {

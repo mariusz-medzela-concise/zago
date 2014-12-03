@@ -1,21 +1,36 @@
 $(document).ready(function(){
-    $('#menuButton button').on('tap', function(){
-       $(this).click();
-    });
+    // Simulate click action on touch screen tap (hopefully)
+    $('button#menuButton').on('tap', function(){ $(this).click(); });
+
+    
+    function cssTester(){
+        var HTMLclasses= $('html')[0].classList;
+        var wrap = document.createElement('div');
+        wrap.classList.add('tester_classes');
+        for (var i = 0; HTMLclasses.length > i; i++) {
+            var sect = document.createElement('div');
+            sect.innerHTML = HTMLclasses[i];
+            wrap.appendChild(sect);
+        };
+        document.body.appendChild(wrap);
+    };
+
+    // cssTester();   
+
 });
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-var app = angular.module('app', ['ui.router', 'ngSanitize']);
+var app = angular.module('app', ['ui.router', 'ngSanitize', 'duScroll']);
 
-app.config(['$stateProvider', '$urlRouterProvider',
-    function($stateProvider , $urlRouterProvider) {
+app.config(['$stateProvider', '$urlRouterProvider', '$locationProvider',
+    function($stateProvider , $urlRouterProvider, $locationProvider) {
 
-        $urlRouterProvider.otherwise('/home');
+        $urlRouterProvider.otherwise('/');
 
         $stateProvider
         .state('home', { 
-            url: '/home',
+            url: '/',
             templateUrl: 'partials/home.html',
             controller: 'HomeCtrl'
         })
@@ -24,7 +39,7 @@ app.config(['$stateProvider', '$urlRouterProvider',
             templateUrl: 'partials/projects.html',
             controller: 'ProjectsCtrl'
         })
-        .state('project', { 
+        .state('project', {
             url: '/projects/:project',
             templateUrl: 'partials/project.html',
             controller: 'ProjectDetailCtrl'
@@ -43,34 +58,51 @@ app.config(['$stateProvider', '$urlRouterProvider',
             url: '/error',
             templateUrl: 'partials/error.html',
             controller: 'ErrorCtrl'
+        })
+        .state('legacy', { 
+            url: '/legacy',
+            templateUrl: 'partials/legacy.html',
+            controller: 'LegacyCtrl'
         });
+
+        $locationProvider.html5Mode(true);
 }]);
 
-app.run(function($rootScope, $state, Storage) {
+app.run(function($rootScope, $state, SiteLoader, Storage, Functions, $window) {
 
     $rootScope.$on('$stateChangeStart', function(event, to, toParams, from, fromParams){
 
+        $rootScope.isRouting = true;
+        
         // If the Site Data is missing, stop navigation and retreive data
         // Cache timer for Storage (24hrs: 86400000 1hr: 3600000 1min: 60000)
         var newTimestamp = new Date().getTime();
         // Set Time of User Entry (default to 24hr reset)
-        Storage.entryTimestamp = (Storage.entryTimestamp && Storage.entryTimestamp > (newTimestamp - 86400000)) ? Storage.entryTimestamp : newTimestamp;
+        Storage.dailyTimestamp = (Storage.dailyTimestamp && Storage.dailyTimestamp > (newTimestamp - 86400000)) ? Storage.dailyTimestamp : newTimestamp;
         // If the Storage Site object is empty or older than X, reload Wordpress data tree (default to 1hr reset)
-        if (!Storage.site || !Storage.siteTimestamp || (Storage.siteTimestamp < newTimestamp - 3600000)) {
+        if (!Storage.site || !Storage.dataTimestamp || (Storage.dataTimestamp < newTimestamp - 3600000)) {
             event.preventDefault();
             $rootScope.pageReady = false;
-
-            $rootScope.getRawData().then(function(data){
-                // Assign Data Tree in appropriate variables and formats
-                var site = data.data;
-                $rootScope.site = $rootScope.getPosts(site);
-                Storage.site = JSON.stringify($rootScope.site);
-                Storage.siteTimestamp = newTimestamp;
+            SiteLoader.getRawData().then(function(data){
+                var site, posts;
+                // If object returned is some fucked up IE shit (ie String), parse it
+                site = data.responseText || data.data;
+                if (typeof site == 'string') { site = JSON.parse(site); }
+                // Get & Store Posts Tree
+                posts = SiteLoader.getPosts(site);
+                Storage.site = JSON.stringify(posts);
+                Storage.dataTimestamp = newTimestamp;
+                $rootScope.site = posts;
 
                 // Continue to Destination
                 $state.go(to.name, toParams);
             });
         }
+
+        // Remove page-specific event listeners
+        Functions.removeListeners();
+
+        // Functions.toggleMenu(true);
         
     });
 
@@ -82,7 +114,7 @@ app.run(function($rootScope, $state, Storage) {
         $rootScope.previousState = from.name;
         $rootScope.thisState = to.name;
         $rootScope.pageReady = true;
-        $rootScope.toggleMenu(true);
+        $rootScope.isRouting = false;
 
         // Add/Remove page class to footer element
         document.getElementsByTagName('footer')[0].className = '';
@@ -98,7 +130,279 @@ app.run(function($rootScope, $state, Storage) {
 // Declare sessionStorage
 app.factory('Storage', function(){
     var db = window.localStorage;
-    return db;
+    // Test that LocalStorage works, return Angular object if disabled
+    try {
+        db.testKey = '1';
+        delete db.testKey;
+        return db; }
+    catch (error) {
+        return {}; }
+});
+
+// Site Loader
+app.factory('SiteLoader', function($http, $q){
+
+    var reqUrl = 'http://admin.zagollc.com/wp-json/posts?filter[posts_per_page]=1000';
+
+    function sorter(a,b) {
+        if ( a.order < b.order ) return -1;
+        if ( a.order > b.order ) return 1;
+        return 0;
+    }
+
+    return {
+        'getRawData' : function(){
+            var deferred = $q.defer();
+            // If some fucked up IE feature exists, use it
+            if(window.XDomainRequest){
+                var xdr = new XDomainRequest();
+                xdr.open("get", reqUrl);
+                xdr.onprogress = function () { };
+                xdr.ontimeout = function () { };
+                xdr.onerror = function () { };
+                xdr.onload = function() {
+                  deferred.resolve(xdr);                  
+                }
+                setTimeout(function () {xdr.send();}, 0);
+            // Otherwise, use implementation of every other browser in existence
+            } else {
+                deferred.resolve($http.get(reqUrl));
+            }
+            return deferred.promise;
+        },
+
+        'getPosts' : function(rawData){
+
+            console.log('Parse data:');
+            console.log(rawData);
+
+            function ternValue(object, i) {
+                if (i) {
+                    var index = i || 0;
+                    return object ? object[index] : null; }
+                else {
+                    return object ? object : null; }
+            }
+
+            function splitCSV(str) {
+                // Remove whitespace and split by ','
+                var arr = str.replace(/, /g,',').split(",");
+                return arr;
+            };
+
+            // Structure Site Posts object 
+            function postTree(Site){
+                var tree = {
+                    'home' : {
+                        'blurb' : [],
+                        'banners' : [],
+                        'sections': [],
+                        'images': [],
+                        'preloaded': false
+                    },
+                    'project': {
+                        'blurb' : [],
+                        'projects': [],
+                        'images': [],
+                        'preloaded': false
+                    },
+                    'team' : {
+                        'blurb': [],
+                        'members': [],
+                        'images': [],
+                        'preloaded': false
+                    }
+                };
+
+                // Categorize Posts into Site object
+                for (var i = 0; Site.length > i; i++) {
+                    // Assign Current Post to variable
+                    var post = Site[i];
+
+                    // Check if Post has been given 2 Categories (bad)
+                    if (post.terms.category.length == 1 && post.status == 'publish') {
+
+                        // General temp Post Object
+                        var temp = {
+                            'id' : post.ID,
+                            'title' : ternValue(post.title),
+                            'order' : ternValue(post.acf.arrangement),
+                            'body' : ternValue(post.content),
+                            'content' : { }
+                        };
+                        
+                        var images = [];
+
+                        // Populate temp Post Object according to Post Type
+                        //////////////////////////////////////////////////////////////////////////////
+                        if (post.terms.category[0].slug == 'home-hero-banner') {
+                            
+                            temp.content = {
+                                'banner_caption' : ternValue(post.acf.banner_caption),
+                                'images' : []
+                            };
+
+                            for (var h = 0; post.acf.banner_images.length > h; h++) {
+                                var obj = {
+                                    'url' : post.acf.banner_images[h].image.url,
+                                    'alt' : ternValue(post.acf.banner_images[h].alt),
+                                    'order' : ternValue(post.acf.banner_images[h].arrangement)
+                                }
+                                temp.content.images.push(obj);
+                                tree.home.images.push(obj.url);
+                            }
+
+                            tree.home.banners.push(temp);
+                            continue;
+                        }
+
+                        if (post.terms.category[0].slug == 'home-section' && tree.home.sections.length < 4) {
+                            temp.content = {
+                                'image_id' : ternValue(post.acf.banner_image.id),
+                                'image_alt' : ternValue(post.acf.banner_image.alt),
+                                'image_url': ternValue(post.acf.banner_image.url),
+                                'image_caption' : ternValue(post.acf.banner_caption)
+                            };
+
+                            tree.home.images.push(temp.content.image_url);
+                            tree.home.sections.push(temp);
+                            continue;
+                        }
+
+                        if (post.terms.category[0].slug == 'home-blurb') {
+                            // temp.content = {
+                                
+                            // };
+
+                            tree.home.blurb.push(temp);
+                            continue;
+                        }
+
+                        if (post.terms.category[0].slug == 'projects-blurb') {
+                            // temp.content = {
+
+                            // };
+
+                            tree.project.blurb.push(temp);
+                            continue;
+                        }
+
+                        if (post.terms.category[0].slug == 'project') {
+
+                            temp.content = {
+                                'case_study' : post.acf.case_study,
+                                'client' : ternValue(post.acf.client),
+                                'services' : ternValue(post.acf.services),
+                                'project' : ternValue(post.acf.project),
+                                'project_url' : ternValue(post.acf.project_url),
+                                'featured_image' : (post.acf.featured_image && !post.acf.case_study) ? post.acf.featured_image.url : (post.acf.images[0].image.url || null),
+                                'related_projects' : ternValue(post.acf.related_projects),
+                                'read_about' : ternValue(post.acf.read_about),
+                                'images' : []
+
+                            };
+
+                            // Get project images outside of repeater array (if case study IS selected)
+                            if (post.acf.images && post.acf.case_study == true) {
+                                for (var d = 0; post.acf.images.length > d; d++) {
+                                    var obj = {
+                                        'url' : post.acf.images[d].image.url,
+                                        'alt' : post.acf.images[d].image.alt,
+                                        'label' : post.acf.images[d].label,
+                                        'order' : post.acf.images[d].arrangement,
+                                        'half' : post.acf.images[d].half,
+                                    };
+
+                                    // Check if object exists in tree already
+                                    for (image in temp.content.images) {
+                                        if (image.url == obj.url && image.order == obj.order) {
+                                            var urlExists = true;
+                                            break;
+                                    }   }
+
+                                    // If new image obj, add to tree
+                                    if (!urlExists) { temp.content.images.push(obj); }
+                                    
+                                }
+                            }
+
+                            // Get project images from featured image (if case study NOT selected)
+                            if (post.acf.featured_image && temp.content.case_study == false) {
+                                var obj = {
+                                    'url' : post.acf.featured_image.url,
+                                    'alt' : post.acf.featured_image.alt,
+                                    'label' : 'Featured Image',
+                                    'order' : 1,
+                                    'half' : false,
+                                };
+
+                                temp.content.images.push(obj);
+                            }
+
+                            tree.project.images.push(temp.content.featured_image);
+                            tree.project.projects.push(temp);
+
+                            // Sort projects object via arrangement parameter
+                            tree.project.projects.sort(sorter);
+
+                            continue;
+                        }
+
+                        if (post.terms.category[0].slug == 'team-blurb') {
+                            // temp.content = {
+                            // };
+
+                            tree.team.blurb.push(temp);
+                            continue;
+                        }
+
+                        if (post.terms.category[0].slug == 'team-member') {
+                            temp.content = {
+                                'position' : ternValue(post.acf.position),
+                                'linkedin_url' : ternValue(post.acf.linkedin_url),
+                                'featured_image' : (post.acf.profile_picture && post.acf.profile_picture.url) ? post.acf.profile_picture.url : null,
+                                'funny_picture' : (post.acf.funny_picture && post.acf.funny_picture.url) ? post.acf.funny_picture.url : null
+                            };
+
+                            tree.team.images.push(temp.content.featured_image);
+                            temp.content.funny_picture ? tree.team.images.push(temp.content.funny_picture) : '';
+                            
+                            tree.team.members.push(temp);
+                            continue;
+                        }
+                    }
+                }
+
+                // Retrieve and Store each project's Related Projects info
+                // For each project in Site Tree
+                var projects = tree.project.projects;
+                for (var o = 0; projects.length > o; o++) {
+                    var related = projects[o].content.related_projects || [];
+                    var details = [];
+                    // For each Related Project of currently selected project
+                    for (var p = 0; related.length > p; p++) {
+                        // Loop thru each project and find ID match
+                        for (var r = 0; projects.length > r; r++) {
+                            if (related[p] == projects[r].id) {
+                                var obj = {
+                                    'id' : projects[r].id,
+                                    'title' : projects[r].title,
+                                    'client' : projects[r].content.client,
+                                    'image' : projects[r].content.featured_image
+                                };
+                                details.push(obj);
+                                break; } } }
+                    // Assign/Push new Related Pojects obj into tree
+                    projects[o].content.related_projects = details;
+                }
+
+                console.log(tree);
+
+                return tree;
+            };
+
+            return postTree(rawData); }
+    }
 });
 
 // javaScript created styles
@@ -112,10 +416,8 @@ app.factory('Styling', function(){
         'add' : function(str){ div.innerHTML = div.innerHTML.concat(str); },
         'clear' : function(){ div.innerHTML = ''; }
     }
-
 });
 
-// I provide a utility class for preloading image objects.
 app.factory("Preloader", function( $q, $rootScope, Storage ) {
 
     var checkPrompt = function(){
@@ -126,13 +428,11 @@ app.factory("Preloader", function( $q, $rootScope, Storage ) {
 
     Preloader.preload = function( images ) {
         if (images.length) {
-            console.info('Preloader Running');
             // I keep track of the state of the loading images.
             $rootScope.isLoading = true;
             $rootScope.isSuccessful = false;
             $rootScope.percentLoaded = 0;
-
-            // I am the image SRC values to preload and display./
+            console.log('Preloading Images');
 
             // Preload the images; then, update display when returned.
             this.preloadImages( images ).then(
@@ -141,8 +441,9 @@ app.factory("Preloader", function( $q, $rootScope, Storage ) {
                     // Loading was successful.
                     $rootScope.isLoading = false;
                     $rootScope.isSuccessful = true;
+                    $rootScope.$emit('$viewContentLoaded');
 
-                    console.info( "Preload Successful" );
+                    console.log('Preloading Complete');
 
                     checkPrompt();
                 },
@@ -151,21 +452,18 @@ app.factory("Preloader", function( $q, $rootScope, Storage ) {
                     // Loading failed on at least one image.
                     $rootScope.isLoading = false;
                     $rootScope.isSuccessful = false;
-
-                    console.error( "Image Failed", imageLocation );
-                    console.info( "Preload Failure" );
+                    $rootScope.$emit('$viewContentLoaded');
 
                 },
                 function handleNotify( event ) {
 
                     $rootScope.percentLoaded = event.percent;
 
-                    // console.info( "Percent loaded:", event.percent );
+                    console.info( "Percent loaded:", event.percent );
 
                 }
             );
         } else {
-            console.info('No images to preload..');
             checkPrompt();
         }
 
@@ -400,8 +698,239 @@ app.factory("Preloader", function( $q, $rootScope, Storage ) {
 
     // Return the factory instance.
     return( Preloader );
-
 });
+
+app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $document, $timeout ) {
+
+    // Data Elements
+    ////////////////////////////////////////////////////////////////
+    var eventListeners = [];
+
+    // DOM Elements
+    ////////////////////////////////////////////////////////////////
+    var dom = getDOM();
+
+    function getDOM(){
+        var dom = {
+            'body' : document.body,
+            'content' : document.getElementById('pageContent'),
+            'footer' : document.getElementById('footer'),
+            'menuBtn' : document.getElementById('menuButton'),
+            'mainNav' : document.getElementById('mainNav'),
+            'mainMenu' : document.getElementById('menuWrapper'),
+            'sectionNav' : document.getElementById('sectionNav'),
+            'scrollTopBtn' : document.getElementById('scrollTop'),
+            'siteID' : document.getElementById('siteID'),
+            'prompt' : document.getElementById('menuPrompt')
+        };
+
+        return dom;
+    };
+
+    $rootScope.$on('$viewContentLoaded', function(){ dom = getDOM(); });
+
+    // Helper Functions
+    ////////////////////////////////////////////////////////////////
+
+    function prevent(e){ 
+        e.preventDefault();
+    };
+
+    function stopProp(e){ 
+        e.stopPropagation();
+    };
+
+    function reloadSite(){
+        setTimeout(function(){
+            Storage.clear();
+            location.reload();
+            return;
+        }, 100);
+    };
+
+    function hidePrompt(){
+        // Function to hide menuPrompt
+        dom.prompt.classList.add('hiding');
+        setTimeout(function(){
+            dom.prompt.classList.add('hidden');
+        }, 500);
+    };
+
+    function disableScroll(set){
+        if (set) {
+            dom.body.classList.add('hidden');
+            dom.body.addEventListener('touchmove', prevent, true);
+            // dom.mainNav.addEventListener('touchmove', stopProp);
+            $(dom.body).css('height', window.innerHeight+'px');
+        } else {
+            dom.body.classList.remove('hidden');
+            dom.body.removeEventListener('touchmove', prevent, true);
+            // dom.mainNav.removeEventListener('touchmove', stopProp);
+            $(dom.body).css('height', '');
+        }
+    };
+
+    // Object Menthods
+    ////////////////////////////////////////////////////////////////
+    return {
+
+        'anchorTo' : function(anchor) {
+                var elem = document.getElementById(anchor);
+                var menuHeight = dom.sectionNav.scrollHeight;
+                $document.scrollToElement(elem, menuHeight, '500');
+            },
+
+        'hidePrompt' : hidePrompt,
+
+        'reloadSite' : reloadSite,
+
+        'disableScroll' : disableScroll,
+
+        'hideAppElements' : function(){
+            console.log('hiding app elements');
+            dom.siteID.style.display = 'none';
+            dom.mainNav.style.display = 'none';
+            dom.menuBtn.style.display = 'none';
+            dom.prompt.style.display = 'none';
+            dom.footer.style.display = 'none';
+        },
+
+        'preloadImages' : function(posts, src) {
+            if (posts.images && !posts.preloaded) {
+                console.log(src);
+                // Preload Images if first time
+                Preloader.preload(posts.images);
+                posts.preloaded = true;
+                // Update Storage object to reflect preload status
+                console.log(JSON.parse(Storage.site));
+                var site = JSON.parse(Storage.site);
+                site[src] = posts;
+                Storage.site = JSON.stringify(site);
+                console.log(JSON.parse(Storage.site));
+            }
+        },
+
+        'removeListeners' : function(){
+                var arr = eventListeners;
+                for (var i = 0; arr.length > i; i++) {
+                    arr[i].obj.removeEventListener(arr[i].evt, arr[i].func, arr[i].bub)
+                };
+                eventListeners = [];
+            },
+
+        'route' : function(route, turnOff, params) {
+                var menuOpen = dom.mainNav.classList.contains('menu-open');
+                this.toggleMenu(turnOff);
+
+                if ($state.current.name != route || $state.params != params) {
+
+                    // pause for menu animation if routing while menu was open [500ms menu animation, 50ms toggle delay]
+                    if (menuOpen) { setTimeout(function(){ $state.go(route, params); }, 550); }
+                    else { $state.go(route, params); }
+                // If route is same as current view, scrollTop()
+                } else { this.scrollTop(); }
+            },
+        
+        'setListener' : function(obj, evt, func, bub){
+                obj.addEventListener(evt, func);
+                eventListeners.push({
+                    'obj' : obj,
+                    'evt' : evt,
+                    'func': func,
+                    'bub' : bub
+                });
+            },
+
+        'showScroll' : function() {
+                if (window.pageYOffset > 200) { dom.scrollTopBtn.classList.add('show'); }
+                else { dom.scrollTopBtn.classList.remove('show'); }
+            },
+
+        'scrollTop' : function() {
+                $document.scrollTo(0, 0, 500);
+            },
+
+        'throttle' : function(fn, threshhold, scope) {
+                threshhold || (threshhold = 250);
+                var last, deferTimer;
+                return function () {
+                    var context = scope || this;
+                    var now = +new Date,
+                    args = arguments;
+                    if (last && now < last + threshhold) {
+                        // hold on to it
+                        clearTimeout(deferTimer);
+                        deferTimer = setTimeout(function () {
+                            last = now;
+                            fn.apply(context, args);
+                        }, threshhold);
+                    } else {
+                        last = now;
+                        fn.apply(context, args);
+                    }
+                };
+            },
+
+        'toggleMenu' : function(turnOff){
+
+                // Delete tree if Shift key is pressed when menuButton clicked
+                try { // Event obj missing in firefox
+                    if (event && event.shiftKey && event.target.id == 'menuButton') {
+                        reloadSite();
+                        return; } }
+                catch (error) { }
+
+                function close(){
+
+                        dom.body.classList.remove('hidden');
+                        setTimeout(function(){mainNav.classList.remove('menu-open')}, 50); // timeout for Firefox animation fix (pretty glitchy tho)
+                        dom.menuBtn.classList.remove('menu-open');
+                        dom.content.classList.remove('menu-open');
+                        dom.content.removeEventListener('click', close, true); // (bug) Doesn't remove until content area is actually clicked
+                        disableScroll(); console.log('toggle menu close');
+               
+                };
+
+                function open(){
+
+                        setTimeout(function(){mainNav.classList.add('menu-open')}, 50); // timeout for Firefox animation fix (pretty glitchy tho)
+                        dom.menuBtn.classList.add('menu-open');
+                        dom.content.classList.add('menu-open');
+                        dom.content.addEventListener('click', close, true);
+                        disableScroll(true); console.log('toggle menu open');
+
+                        // If first time user opens menu, hide menuPrompt
+                        if (!Storage.prompted) {
+                            Storage.prompted = true;
+                            hidePrompt();
+                        };
+             
+                };
+
+                // Toggle Logic
+                // If turnoff var true, and menu-open, close menu. if menu closed, do nothing
+                // if turnoff var false, close menu if open, open if close
+                if (turnOff) {
+                    if (turnOff && dom.mainNav.classList.contains('menu-open')) {
+                        close();
+                    }
+                } else {
+                    if (dom.mainNav.classList.contains('menu-open')) { close(); }
+                    else { open(); }
+                }
+            },
+
+        'viewProject' : function(id){
+                console.log('viewProject clicked: ' + id);
+                this.route('project', true, {'project':id});
+            },
+        'testFunction' : function(test){
+            console.log(test || 'test');
+        }
+    }
+});
+
+////////////////////////////////////////////////////////////////////////////////////
 
 app.directive('grid', function($compile) {
 
@@ -461,8 +990,13 @@ app.directive('grid', function($compile) {
             imgWrap.setAttribute('class', 'imgWrapper');
             // Create Img Element
             var img = document.createElement('img');
-            img.setAttribute('ng-src', data.content.featured_image);
+            img.setAttribute('ng-src', data.content.featured_image); // @todo fix projects bug
             imgWrap.appendChild(img);
+            if (data.content.funny_picture) {
+                var img2 = document.createElement('img');
+                img2.setAttribute('ng-src', data.content.funny_picture);
+                imgWrap.appendChild(img2);
+            }
             // Create Overlay
             var ovrly = document.createElement('div');
             ovrly.setAttribute('class', 'overlay');
@@ -545,7 +1079,18 @@ app.directive('grid', function($compile) {
                 $(this.parentNode).children('.imgWrapper').children('.overlay').removeClass('open');
             }
         ).click(function(){
-            var project = this.parentNode.dataset.id;
+            var project;
+            try {
+                project = this.parentNode.dataset.id;
+            } catch(e) {
+                for (var i = 0; this.parentNode.attributes.length > i; i++) {
+                    if (this.parentNode.attributes[i].nodeName = "data-id") {
+                        project = this.parentNode.attributes[i].nodeValue;
+                        break;
+                    }
+                };
+            }
+            console.log(project);
             scope.$parent.viewProject(project);
         });
         
@@ -590,521 +1135,130 @@ app.directive('officeList', function() {
         restrict: "A",
         templateUrl: 'pieces/office_list.html',
         link: linker
-        // scope: {
-        //     content:'='
-        // }
     };
 });
 
 app.directive('socialButtons', function() {
+
+    var linker = function(scope, element, attrs) {
+        scope.socials = [
+            {
+                'name'  : 'facebook',
+                'url'   : 'https://www.facebook.com/zago',
+                'class' : 'fb_btn',
+                'order' : 0
+            },
+            {
+                'name'  : 'twitter',
+                'url'   : 'https://twitter.com/zagonyc',
+                'class' : 'tw_btn',
+                'order' : 1
+            },
+            {
+                'name'  : 'behance',
+                'url'   : 'https://www.behance.net/Zagolovesyou',
+                'class' : 'be_btn',
+                'order' : 2
+            },
+            {
+                'name'  : 'pinterest',
+                'url'   : 'http://www.pinterest.com/zagolovesyou',
+                'class' : 'pi_btn',
+                'order' : 3
+            }, 
+            {
+                'name'  : 'linkedin',
+                'url'   : 'https://www.linkedin.com/company/zago',
+                'class' : 'li_btn',
+                'order' : 4
+            },
+            {
+                'name'  : 'email',
+                'url'   : 'mailto:info@zagollc.com',
+                'class' : 'ma_btn',
+                'order' : 5
+            }  
+        ];
+    };
+
     return {
         restrict: "A",
-        templateUrl: 'pieces/social_buttons.html'
+        templateUrl: 'pieces/social_buttons.html',
+        link: linker
     };
 });
 
-Array.prototype.getUnique = function(){
-   var u = {}, a = [];
-   for(var i = 0, l = this.length; i < l; ++i){
-      if(u.hasOwnProperty(this[i])) {
-         continue;
-      }
-      a.push(this[i]);
-      u[this[i]] = 1;
-   }
-   return a;
-}
+app.directive('homeSections', function() {
+    
+    var linker = function(scope, element, attrs) {
+        // scope.banner_caption.first = 
+        var words = scope.section.content.image_caption.trim().split(" ");
+        var colors = ['blue', 'yellow', 'pink', 'green'];
 
-Array.prototype.shuffle = function() {
-    for (var i = this.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var temp = this[i];
-        this[i] = this[j];
-        this[j] = temp;
+        scope.caption = {
+            'first' : words[0],
+            'last' : words[1] + ' ' + words[2],
+            'color' : colors[(scope.$index % 4)]
+        }
     }
-    return this;
-}
+
+    return {
+        restrict: "A",
+        templateUrl: 'pieces/home_sections.html',
+        link: linker
+    };
+});
+
+app.directive('underZ', function() {
+    
+    var linker = function(scope, element, attrs) {
+        element[0].innerHTML = scope.str.replaceAll(' Z ', ' <u class="z">Z</u> ');
+    }
+
+    return {
+        restrict: "A",
+        scope: { str: "@" },
+        link: linker
+    };
+});
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-app.controller('AppCtrl', function($scope, $location, $anchorScroll, $rootScope, $q, $http, $state, Storage, $stateParams){
+app.controller('AppCtrl', function($scope, Functions, Storage){
 
-    // App Wide Functions
-    ////////////////////////////////////////////////////////////////////////////////////
-
-    $scope.route = function(route, turnMenuOff, params) {
-
-        var turnOff = turnMenuOff ? turnMenuOff : false;
-        var menuOpen = $('#mainNav').hasClass('menu-open');
-
-        $scope.toggleMenu(turnOff);
-        // pause for menu animation if routing while menu was open
-        if (menuOpen) {
-            setTimeout(function(){
-                $state.go(route, params);
-            }, 500);
-        } else {
-            $state.go(route, params);
-        }
-
+    $scope.test = function() {
+        console.logf('testing');
     };
 
-    $scope.viewProject = function(id){
-        $scope.route('project', true, {'project':id});
-    };
-
-    $rootScope.toggleMenu = function(turnOff){
-
-        var content = document.getElementById('pageContent');
-        var prompt = document.getElementById('menuPrompt');
-
-        function close(){
-            $('#mainNav').removeClass('menu-open');
-            $('button#menuButton').removeClass('active-menu');
-            $('body').removeClass('hidden');
-            content.classList.remove('menu-open');
-            content.removeEventListener('click', close, true); // (bug) Doesn't remove until content area is actually clicked
-            document.body.removeEventListener('touchmove', prevent, true);
-            document.height = 'auto';
-        };
-
-        function open(){
-            $('#mainNav').addClass('menu-open');
-            $('button#menuButton').addClass('active-menu');
-            $('body').addClass('hidden');
-            content.classList.add('menu-open');
-            content.addEventListener('click', close, true);
-            document.body.addEventListener('touchmove', prevent, true);
-            document.height = window.innerHeight;
-
-            // If first time user opens menu, hide menuPrompt
-            if (!Storage.prompted) {
-                Storage.prompted = true;
-                hidePrompt();
-            };
-        };
-
-        var turnOff = turnOff ? turnOff : false;
-
-        if ($('#mainNav').hasClass('menu-open') || turnOff) { close(); }
-        else { open(); }
-    };
-
-    // General function to time-throttle high-frequency functionality
-    $rootScope.throttle = function(fn, threshhold, scope) {
-        threshhold || (threshhold = 250);
-        var last,
-        deferTimer;
-        return function () {
-            var context = scope || this;
-            var now = +new Date,
-            args = arguments;
-            if (last && now < last + threshhold) {
-                // hold on to it
-                clearTimeout(deferTimer);
-                deferTimer = setTimeout(function () {
-                    last = now;
-                    fn.apply(context, args);
-                }, threshhold);
-            } else {
-                last = now;
-                fn.apply(context, args);
-            }
-        };
-    }
-
-    // ScrollToTop click functionality
-    $scope.scrollTop = function() {
-        $("html, body").animate({ scrollTop: 0 }, 200);
-    };
+    $scope.route = Functions.route;
+    $scope.toggleMenu = Functions.toggleMenu;
+    $scope.viewProject = Functions.viewProject;
+    $scope.anchorTo = Functions.anchorTo;
+    $scope.scrollTop = Functions.scrollTop;
+    $scope.colors = ['#00ffff','#ffff00','#ff00ff','#00ff00'];
 
     // Show/Hide ScrollToTop button functionality
-    var scrollTopBtn = document.getElementById('scrollTop');
-    var showScroll = function() {
-        if (window.pageYOffset > 200) {
-            scrollTopBtn.classList.add('show');
-        } else {
-            scrollTopBtn.classList.remove('show');
-        }
-    }; window.onscroll =  $rootScope.throttle(showScroll, 200);
-
-    // Situational & Helper Functions
-    ////////////////////////////////////////////////////////////////////////////////////
-
-    // Named function to preventDefault event actions
-    var prevent = function(e){ 
-        e.preventDefault();
-    };
-
-    var sorter = function(a,b) {
-        if ( a.order < b.order )
-            return -1;
-        if ( a.order > b.order )
-            return 1;
-        return 0;
-    }
-
-    // Function to hide menuPrompt
-    var hidePrompt = function(){
-        var prompt = document.getElementById('menuPrompt');
-        prompt.classList.add('hiding');
-        setTimeout(function(){
-            prompt.classList.add('hidden');
-        }, 500);
-    }
+    window.addEventListener('scroll', Functions.throttle(Functions.showScroll, 200));
+    
     // hide menuPrompt if user has already opened menu
-    if (Storage.prompted) {
-        hidePrompt();
-    }
+    if (Storage.prompted) { Functions.hidePrompt(); }
 
-    $rootScope.colors = ['#00ffff','#ffff00','#ff00ff','#00ff00'];
-
-    // Loading Functions
+    // Splash Page configuration
     ////////////////////////////////////////////////////////////////////////////////////
 
-    $rootScope.getRawData = function(){
-
-        var reqUrl = 'http://admin.zagollc.com/wp-json/posts?filter[posts_per_page]=1000';
-        var deferred = $q.defer();
-        deferred.resolve($http.get(reqUrl));
-        return deferred.promise;
-    };
-
-    $rootScope.getPosts = function(rawData){
-
-        // Get image attachments from WP object
-        // function getAttachmentByID(aid, loc) {
-        //     for (var i = 0; i < loc.length; ++i) {
-        //         if (loc[i].id == aid) {
-        //             return loc[i].url;
-        // }   }   }
-
-        function ternValue(object, i) {
-            if (i) {
-                var index = i || 0;
-                return object ? object[index] : null; }
-            else {
-                return object ? object : null; }
+    (function splashPage() {
+        // If first time visiting site via mobile, flash splashpage
+        if (!Storage.splashed && (Modernizr.phone)) {
+            $scope.showSplash = true;
+            Functions.disableScroll(true);
         }
+    })();
 
-        function splitCSV(str) {
-            // Remove whitespace and split by ','
-            var arr = str.replace(/, /g,',').split(",");
-            return arr;
-        };
-
-        // Custom Function to unserialize PHP array
-        function unserialize(data) {
-            //  discuss at: http://phpjs.org/functions/unserialize/
-            //  original by: Arpad Ray (mailto:arpad@php.net)
-            //  note: We feel the main purpose of this function should be to ease the transport of data between php & js
-            //  note: Aiming for PHP-compatibility, we have to translate objects to arrays
-
-            var that = this,
-            utf8Overhead = function(chr) {
-            // http://phpjs.org/functions/unserialize:571#comment_95906
-            var code = chr.charCodeAt(0);
-            if (code < 0x0080) {
-                return 0;
-            }
-            if (code < 0x0800) {
-                return 1;
-            }
-            return 2;
-            };
-            error = function(type, msg, filename, line) {
-                throw new that.window[type](msg, filename, line);
-            };
-            read_until = function(data, offset, stopchr) {
-                var i = 2,
-                buf = [],
-                chr = data.slice(offset, offset + 1);
-
-                while (chr != stopchr) {
-                    if ((i + offset) > data.length) {
-                        error('Error', 'Invalid');
-                    }
-                    buf.push(chr);
-                    chr = data.slice(offset + (i - 1), offset + i);
-                    i += 1;
-                }
-                return [buf.length, buf.join('')];
-            };
-            read_chrs = function(data, offset, length) {
-                var i, chr, buf;
-
-                buf = [];
-                for (i = 0; i < length; i++) {
-                    chr = data.slice(offset + (i - 1), offset + i);
-                    buf.push(chr);
-                    length -= utf8Overhead(chr);
-                }
-                return [buf.length, buf.join('')];
-            };
-            _unserialize = function(data, offset) {
-                var dtype, dataoffset, keyandchrs, keys, contig,
-                length, array, readdata, readData, ccount,
-                stringlength, i, key, kprops, kchrs, vprops,
-                vchrs, value, chrs = 0,
-                typeconvert = function(x) {
-                    return x;
-                };
-
-                if (!offset) {
-                    offset = 0;
-                }
-                dtype = (data.slice(offset, offset + 1))
-                .toLowerCase();
-
-                dataoffset = offset + 2;
-
-                switch (dtype) {
-                    case 'i':
-                    typeconvert = function(x) {
-                        return parseInt(x, 10);
-                    };
-                    readData = read_until(data, dataoffset, ';');
-                    chrs = readData[0];
-                    readdata = readData[1];
-                    dataoffset += chrs + 1;
-                    break;
-                    case 'b':
-                    typeconvert = function(x) {
-                        return parseInt(x, 10) !== 0;
-                    };
-                    readData = read_until(data, dataoffset, ';');
-                    chrs = readData[0];
-                    readdata = readData[1];
-                    dataoffset += chrs + 1;
-                    break;
-                    case 'd':
-                    typeconvert = function(x) {
-                        return parseFloat(x);
-                    };
-                    readData = read_until(data, dataoffset, ';');
-                    chrs = readData[0];
-                    readdata = readData[1];
-                    dataoffset += chrs + 1;
-                    break;
-                    case 'n':
-                    readdata = null;
-                    break;
-                    case 's':
-                    ccount = read_until(data, dataoffset, ':');
-                    chrs = ccount[0];
-                    stringlength = ccount[1];
-                    dataoffset += chrs + 2;
-
-                    readData = read_chrs(data, dataoffset + 1, parseInt(stringlength, 10));
-                    chrs = readData[0];
-                    readdata = readData[1];
-                    dataoffset += chrs + 2;
-                    if (chrs != parseInt(stringlength, 10) && chrs != readdata.length) {
-                        error('SyntaxError', 'String length mismatch');
-                    }
-                    break;
-                    case 'a':
-                    readdata = {};
-
-                    keyandchrs = read_until(data, dataoffset, ':');
-                    chrs = keyandchrs[0];
-                    keys = keyandchrs[1];
-                    dataoffset += chrs + 2;
-
-                    length = parseInt(keys, 10);
-                    contig = true;
-
-                    for (i = 0; i < length; i++) {
-                        kprops = _unserialize(data, dataoffset);
-                        kchrs = kprops[1];
-                        key = kprops[2];
-                        dataoffset += kchrs;
-
-                        vprops = _unserialize(data, dataoffset);
-                        vchrs = vprops[1];
-                        value = vprops[2];
-                        dataoffset += vchrs;
-
-                        if (key !== i)
-                            contig = false;
-
-                        readdata[key] = value;
-                    }
-
-                    if (contig) {
-                        array = new Array(length);
-                        for (i = 0; i < length; i++)
-                            array[i] = readdata[i];
-                        readdata = array;
-                    }
-
-                    dataoffset += 1;
-                    break;
-                    default:
-                    error('SyntaxError', 'Unknown / Unhandled data type(s): ' + dtype);
-                    break;
-                }
-                return [dtype, dataoffset - offset, typeconvert(readdata)];
-            };
-
-            return _unserialize((data + ''), 0)[2];
-        }
-
-        // Structure Site Posts object 
-        function postTree(Site){
-            var tree = {
-                'home' : {
-                    'blurb' : [],
-                    'banners' : [],
-                    'sections': [],
-                    'images': []
-                },
-                'project': {
-                    'blurb' : [],
-                    'projects': [],
-                    'images': []
-                },
-                'team' : {
-                    'blurb': [],
-                    'members': [],
-                    'images': []
-                }
-            };
-
-            // Categorize Posts into Site object
-            for (var i = 0; i < Site.length; ++i) {
-                // Assign Current Post to variable
-                var post = Site[i];
-
-                // Check if Post has been given 2 Categories (bad)
-                if (post.terms.category.length == 1 && post.status == 'publish') {
-
-                    // General temp Post Object
-                    var temp = {
-                        'id' : post.ID,
-                        'title' : ternValue(post.title),
-                        'order' : ternValue(post.acf.arrangement),
-                        'body' : ternValue(post.content),
-                        'content' : { }
-                    };
-                    
-                    var images = [];
-
-                    // Populate temp Post Object according to Post Type
-                    //////////////////////////////////////////////////////////////////////////////
-                    if (post.terms.category[0].slug == 'home-hero-banner') {
-                        
-                        temp.content = {
-                            'image_id' : ternValue(post.acf.banner_image.id),
-                            'image_url': ternValue(post.acf.banner_image.url),
-                            'image_caption' : ternValue(post.acf.banner_caption)
-                        };
-
-                        tree.home.images.push(temp.content.image_url);
-                        tree.home.banners.push(temp);
-                        continue;
-                    }
-
-                    if (post.terms.category[0].slug == 'home-section') {
-                        temp.content = {
-                            'image_id' : ternValue(post.acf.banner_image.id),
-                            'image_url': ternValue(post.acf.banner_image.url),
-                            'image_caption' : ternValue(post.acf.banner_caption),
-                            'keywords' : post.acf.keywords ? splitCSV(post.acf.keywords) : null
-                        };
-
-                        tree.home.images.push(temp.content.image_url);
-                        tree.home.sections.push(temp);
-                        continue;
-                    }
-
-                    if (post.terms.category[0].slug == 'home-blurb') {
-                        temp.content = {
-                            'power_words' : post.acf.power_words ? splitCSV(post.acf.power_words) : null
-                        };
-
-                        tree.home.blurb.push(temp);
-                        continue;
-                    }
-
-                    if (post.terms.category[0].slug == 'projects-blurb') {
-                        temp.content = {
-
-                        };
-
-                        tree.project.blurb.push(temp);
-                        continue;
-                    }
-
-                    if (post.terms.category[0].slug == 'project') {
-
-                        temp.content = {
-                            'case_study' : post.acf.case_study,
-                            'client' : ternValue(post.acf.client),
-                            'services' : ternValue(post.acf.services),
-                            'project' : ternValue(post.acf.project),
-                            'project_url' : ternValue(post.acf.project_url),
-                            'featured_image' : (post.acf.featured_image && post.acf.featured_image.url) ? post.acf.featured_image.url : (post.acf.images[0].image.url || null),
-                            'images' : [],
-                            'related_projects' : {}
-
-                        };
-
-                        // Get project images from featured image
-                        if (post.acf.featured_image && post.acf.featured_image.url) { temp.content.images.push(post.acf.featured_image.url); }
-                        // Get project images outside of repeater array
-                        if (post.acf.images && post.acf.images.length) {
-                            for (var d = 0; post.acf.images.length > d; d++) {
-                                temp.content.images.push(post.acf.images[d].image.url);
-                            };
-                            // Strip out duplicate urls
-                            temp.content.images = temp.content.images.getUnique();
-                        }
-
-                        // Strip duplicate image urls from the preloader array
-                        tree.project.images.push(temp.content.featured_image);
-                        tree.project.images = tree.project.images.getUnique();
-
-                        tree.project.projects.push(temp);
-
-                        // Sort projects object via arrangement parameter
-                        tree.project.projects.sort(sorter);
-
-                        continue;
-                    }
-
-                    if (post.terms.category[0].slug == 'team-blurb') {
-                        temp.content = {
-                        };
-
-                        tree.team.blurb.push(temp);
-                        continue;
-                    }
-
-                    if (post.terms.category[0].slug == 'team-member') {
-                        temp.content = {
-                            'position' : ternValue(post.acf.position),
-                            'linkedin_url' : ternValue(post.acf.linkedin_url),
-                            'featured_image' : (post.acf.profile_picture && post.acf.profile_picture.url) ? post.acf.profile_picture.url : null
-                        };
-
-                        tree.team.images.push(temp.content.featured_image);
-                        tree.team.members.push(temp);
-                        continue;
-                    }
-                }
-            }
-
-            return tree;
-        };
-
-        return postTree(rawData);
-
+    $scope.hideSplash = function() {
+        Storage.splashed = true;
+        $scope.showSplash = false;
+        Functions.disableScroll(false);
     };
-
-});
-
-app.controller('ErrorCtrl', function($scope, $rootScope, $state, Storage){
 
 });
 
@@ -1112,43 +1266,144 @@ app.controller('HeaderCtrl', function($scope, $rootScope, $state, Storage){
 
 });
 
-app.controller('HomeCtrl', function($scope, $rootScope, $state, Storage, Preloader){
+app.controller('HomeCtrl', function($scope, $rootScope, $timeout, $interval, Functions, Preloader, Storage){
 
-    $scope.pageView = "homePage";
+    $rootScope.pageView = "homePage";
 
     var posts = JSON.parse(Storage.site).home;
 
     $scope.hero = posts.banners[0];
     $scope.blurb = posts.blurb[0];
     $scope.sections = posts.sections;
-    Preloader.preload(posts.images, Preloader, $rootScope);
+
+    // Functions.preloadImages(posts, 'home');
+    Preloader.preload(posts.images);
+
+
+    // Section Nav scrolling event listener & logic
+    ////////////////////////////////////////////////////////////////////////////////////
+    var doneOnce;
+    $rootScope.$on('$viewContentLoaded', function(){
+        // if Images have loaded, it IS the homepage, and the functions haven't been triggered once before
+        if (!$rootScope.isLoading && $rootScope.pageView == 'homePage' && !doneOnce) {
+            doneOnce = true;
+            try { // Workaround for $rootScope.$on checking on every view instead of just homePage
+                console.log('set homepage stuff');
+                $scope.rotateHeros();
+                setDimensions();
+                pinMenu();
+                Functions.setListener(window, 'scroll', Functions.throttle(pinMenu, 10));
+                Functions.setListener(window, 'resize', Functions.throttle(setDimensions, 10)); }
+            catch (error) { }
+        }
+    });
+
+    var pieces; // Get & Set Dimensions and add menu scroll listener once Preloader finishes
+    function setDimensions(){ pieces = getDimensions(); };
+
+    function getDimensions(){
+        var dims = {
+            'blurb' : document.getElementById('homeBlurb'),
+            'nav' : document.getElementById('sectionNav'),
+            'sections' : document.getElementById('homeSections').children,
+            'links' : [],
+            'navPos' : '',
+            'endPos' : ''
+        };
+        
+        dims.links = dims.nav.children[0].children;
+        dims.navPos = dims.blurb.offsetTop + (dims.blurb.scrollHeight - dims.nav.scrollHeight);
+        dims.endPos = dims.sections[dims.sections.length - 1].offsetTop + dims.sections[dims.sections.length-1].scrollHeight;
+
+        return dims;
+    };
+
+    function pinMenu() {
+        // get current Scroll position (fires every pixel)
+        // timeout applies updated isActive variable
+        $timeout(function(){
+            var winPos = window.pageYOffset;
+            var scrollPos = winPos + pieces.nav.scrollHeight + 10;
+            // If scroll position is above highest point of nav, release nav
+            if (winPos <= pieces.navPos) {
+                pieces.nav.classList.remove('pinned');
+                $scope.isActive = '';
+            // if scroll position is below lowest section point, release active class
+            } else if (winPos >= pieces.endPos) {
+                pieces.nav.classList.add('pinned');
+                $scope.isActive = '';
+            // otherwise if scroll position is in section area, pin nav to top and activate actie class
+            } else {
+                pieces.nav.classList.add('pinned');
+                // Check the x/y dimensions against scroll position (including nav height)
+                for (var i = 0; pieces.sections.length > i; i++) {
+                    // if scroll position is within current section, set active class
+                    if (scrollPos > pieces.sections[i].offsetTop && scrollPos < (pieces.sections[i].offsetTop + pieces.sections[i].scrollHeight)) {
+                        $scope.isActive = pieces.sections[i].id;
+                        break;
+                    }
+                    // If this is the last iteration of loop (not in any sections) empty isActive class
+                    else if (i == (pieces.sections.length - 1)) { $scope.isActive = ''; }
+                };
+            }
+        });
+    };
+
+    // Set Rotate of hero banner images
+    ////////////////////////////////////////////////////////////////////////////////////
+    $scope.activeBanner = 0;
+    $scope.lastBanner;
+
+    $scope.rotateHeros = function(idx){
+        var elems = document.getElementById('heroBanner').children;
+        var images = [];
+        // Get IMG Tags
+        for (var i = 0; elems.length > i; i++) {
+            if (elems[i].tagName == 'IMG') {
+                images.push(elems[i]);
+        }   }
+
+        var waitTiming = 4000; // how long each slide remains active
+        var slideTiming = 1500; // CSS transition timing
+
+        // Set rotation interval
+        $interval(function(){
+            $scope.lastBanner = $scope.activeBanner;
+            // If img is last in array, set NEXT to first image, else set to next image in array
+            if (($scope.activeBanner+1) == images.length) { $scope.activeBanner = 0; }
+            else { $scope.activeBanner++; }
+            $timeout(function(){ $scope.lastBanner = null; }, slideTiming); // wait for css transition before unsetting lastBanner
+        }, waitTiming);
+    };
+
 });
 
-app.controller('ProjectsCtrl', function($scope, $rootScope, $state, Storage, Preloader, Styling){
+app.controller('ProjectsCtrl', function($scope, $rootScope, Storage, Preloader, Styling){
 
-    $scope.pageView = "projectsOverviewPage";
+    $rootScope.pageView = "projectsOverviewPage";
 
     var posts = JSON.parse(Storage.site).project;
 
     $scope.blurb = posts.blurb[0];
     $scope.projects = posts.projects;
 
-    Preloader.preload(posts.images, Preloader, $rootScope);
+    Preloader.preload(posts.images);
 
     (function randomizeHoverColors(){
-        colors = $rootScope.colors.shuffle();
+        colors = $scope.colors.shuffle();
         var styles = '';
         for (var i = 0; colors.length > i; i++) {
             styles = styles.concat('.projectWrapper .grid section:nth-of-type('+(i+1)+') .imgWrapper .overlay{background-color:'+colors[i]+'}');
         };
+        Styling.clear();
         Styling.add(styles);
     })();
 
 });
 
-app.controller('ProjectDetailCtrl', function($scope, $rootScope, $state, $stateParams, Storage, Preloader){
+app.controller('ProjectDetailCtrl', function($scope, $rootScope, $stateParams, Storage, Preloader){
 
-    $scope.pageView = "projectPage";
+    $rootScope.pageView = "projectPage";
 
     var posts = JSON.parse(Storage.site).project;
 
@@ -1182,24 +1437,43 @@ app.controller('ProjectDetailCtrl', function($scope, $rootScope, $state, $stateP
 
     // Redirect back to projects overview page if project or site tree doesn't exist, else preload images
     if (!$scope.project) { $scope.route('projects', true); }
-    else { Preloader.preload($scope.project.content.images, Preloader, $rootScope); }
+    else { Preloader.preload($scope.project.content.images); }
 
 });
 
-app.controller('TeamCtrl', function($scope, $rootScope, $state, $stateParams, Preloader, Storage){
+app.controller('TeamCtrl', function($scope, $rootScope, Preloader, Storage){
 
-    $scope.pageView = "teamPage";
+    $rootScope.pageView = "teamPage";
 
     var posts = JSON.parse(Storage.site).team;
     $scope.blurb = posts.blurb[0];
     $scope.members = posts.members.shuffle();
-    Preloader.preload(posts.images, Preloader, $rootScope);
+    Preloader.preload(posts.images);
 
 });
 
-app.controller('LoveCtrl', function($scope, $rootScope, $state, $stateParams, Preloader, Storage){
+app.controller('LoveCtrl', function($scope, $rootScope){
 
-    $scope.pageView = "lovePage";
+    $rootScope.pageView = "lovePage";
+
+});
+
+app.controller('ErrorCtrl', function($scope, $rootScope, $state, Storage){
+
+});
+
+app.controller('LegacyCtrl', function($scope, $rootScope, $state, Functions, Storage){
+
+    console.log('Implementing Legacy browser notice');
+
+    // Set Notice Height to Window Height, monitor resize event
+    function setBodyHeight(){
+        document.getElementById('legacy-notice').style.minHeight = (((window.innerHeight || document.documentElement.clientHeight)-200) + 'px');
+    }; setBodyHeight();
+
+    window.addEventListener('resize', setBodyHeight);
+
+    Functions.hideAppElements();
 
 });
 
