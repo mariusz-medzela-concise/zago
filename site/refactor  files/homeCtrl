@@ -18,7 +18,6 @@ app.controller('HomeCtrl', function($scope, $rootScope, $timeout, $interval, Fun
         if (!$rootScope.isLoading && $rootScope.pageView == 'homePage' && !doneOnce) {
             doneOnce = true;
             try { // Workaround for $rootScope.$on checking on every view instead of just homePage
-                console.log('set homepage stuff');
                 $scope.rotateHeros();
                 setDimensions();
                 pinMenu();
@@ -44,7 +43,7 @@ app.controller('HomeCtrl', function($scope, $rootScope, $timeout, $interval, Fun
         dims.links = dims.nav.children[0].children;
         dims.navPos = dims.blurb.offsetTop + (dims.blurb.scrollHeight - dims.nav.scrollHeight);
         dims.endPos = dims.sections[dims.sections.length - 1].offsetTop + dims.sections[dims.sections.length-1].scrollHeight;
-
+        
         return dims;
     };
 
@@ -88,9 +87,9 @@ app.controller('HomeCtrl', function($scope, $rootScope, $timeout, $interval, Fun
         var elems = document.getElementById('heroBanner').children;
         var images = [];
         // Get IMG Tags
-        for (var i = 0; elems.length > i; i++) {
-            if (elems[i].tagName == 'IMG') {
-                images.push(elems[i]);
+        for (var r = 0; elems.length > r; r++) {
+            if (elems[r].tagName == 'IMG') {
+                images.push(elems[r]);
         }   }
 
         var waitTiming = 4000; // how long each slide remains active

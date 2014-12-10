@@ -6,13 +6,13 @@ app.run(function($rootScope, $state, SiteLoader, Storage, Functions, $window) {
         
         // If the Site Data is missing, stop navigation and retreive data
         // Cache timer for Storage (24hrs: 86400000 1hr: 3600000 1min: 60000)
+        //////////////////////////////////////////////////////////////////////////
         var newTimestamp = new Date().getTime();
         // Set Time of User Entry (default to 24hr reset)
         Storage.dailyTimestamp = (Storage.dailyTimestamp && Storage.dailyTimestamp > (newTimestamp - 86400000)) ? Storage.dailyTimestamp : newTimestamp;
         // If the Storage Site object is empty or older than X, reload Wordpress data tree (default to 1hr reset)
         if (!Storage.site || !Storage.dataTimestamp || (Storage.dataTimestamp < newTimestamp - 3600000)) {
             event.preventDefault();
-            $rootScope.pageReady = false;
             SiteLoader.getRawData().then(function(data){
                 var site, posts;
                 // If object returned is some fucked up IE shit (ie String), parse it
@@ -36,7 +36,6 @@ app.run(function($rootScope, $state, SiteLoader, Storage, Functions, $window) {
 
     $rootScope.$on( "$stateChangeSuccess", function(event, to, toParams, from, fromParams) {
         
-        $rootScope.pageReady = true;
         $rootScope.isRouting = false;
 
         // Add/Remove page class to footer element

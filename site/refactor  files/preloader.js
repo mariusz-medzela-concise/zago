@@ -1,11 +1,5 @@
 app.factory("Preloader", function( $q, $rootScope, Storage ) {
 
-    var checkPrompt = function(){
-        if (!Storage.prompted) {
-            document.getElementById('menuPrompt').classList.add('bounce');
-        }
-    };
-
     Preloader.preload = function( images ) {
         if (images.length) {
             // I keep track of the state of the loading images.
@@ -24,8 +18,6 @@ app.factory("Preloader", function( $q, $rootScope, Storage ) {
                     $rootScope.$emit('$viewContentLoaded');
 
                     console.log('Preloading Complete');
-
-                    checkPrompt();
                 },
                 function handleReject( imageLocation ) {
 
@@ -39,12 +31,10 @@ app.factory("Preloader", function( $q, $rootScope, Storage ) {
 
                     $rootScope.percentLoaded = event.percent;
 
-                    console.info( "Percent loaded:", event.percent );
+                    // console.info( "Percent loaded:", event.percent );
 
                 }
             );
-        } else {
-            checkPrompt();
         }
 
     };

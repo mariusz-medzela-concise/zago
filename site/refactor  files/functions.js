@@ -24,10 +24,17 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
             'prompt' : document.getElementById('menuPrompt')
         };
 
+        console.dir(dom);
+
         return dom;
     };
 
-    $rootScope.$on('$viewContentLoaded', function(){ dom = getDOM(); });
+    $rootScope.$on('$viewContentLoaded', function(){ 
+        if (!$rootScope.isLoading) {
+            dom = getDOM();
+            checkPrompt();
+        }
+    });
 
     // Helper Functions
     ////////////////////////////////////////////////////////////////
@@ -46,6 +53,15 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
             location.reload();
             return;
         }, 100);
+    };
+
+    function checkPrompt(){
+        console.log('checking prompt');
+        // If user hasn't been prompted/clicked the menu, show prompt (else hide)
+        if (!Storage.prompted) { 
+            dom.prompt.classList.remove('bounce');
+            $timeout(function(){ dom.prompt.classList.add('bounce'); }); // $timeout to let class removal trigger first
+        } else { hidePrompt(); }
     };
 
     function hidePrompt(){
@@ -79,6 +95,7 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
                 var menuHeight = dom.sectionNav.scrollHeight;
                 $document.scrollToElement(elem, menuHeight, '500');
             },
+        'checkPrompt' : checkPrompt,
 
         'hidePrompt' : hidePrompt,
 
@@ -110,6 +127,20 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
             }
             },
 
+        'route' : function(route, turnOff, params) {
+                var params = params || {};
+                var menuOpen = dom.mainNav.classList.contains('menu-open');
+                this.toggleMenu(turnOff);
+
+                // if route is different, or params are different (stringified object comparison), then route to new destination
+                if ($state.current.name != route || JSON.stringify($state.params) != JSON.stringify(params)) {
+                    // pause for menu animation if routing while menu was open [500ms menu animation, 50ms toggle delay]
+                    if (menuOpen) { setTimeout(function(){ $state.go(route, params); }, 550); }
+                    else { $state.go(route, params); }
+                // If route is same as current view, scrollTop()
+                } else { this.scrollTop(); }
+            },
+
         'removeListeners' : function(){
                 var arr = eventListeners;
                 for (var i = 0; arr.length > i; i++) {
@@ -118,21 +149,10 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
                 eventListeners = [];
             },
 
-        'route' : function(route, turnOff, params) {
-                var menuOpen = dom.mainNav.classList.contains('menu-open');
-                this.toggleMenu(turnOff);
-
-                if ($state.current.name != route || $state.params != params) {
-
-                    // pause for menu animation if routing while menu was open [500ms menu animation, 50ms toggle delay]
-                    if (menuOpen) { setTimeout(function(){ $state.go(route, params); }, 550); }
-                    else { $state.go(route, params); }
-                // If route is same as current view, scrollTop()
-                } else { this.scrollTop(); }
-            },
-        
+        // Set page-specific event listener's
+        //(removed @ $stateChangeStart by Functions.removeListeners)
         'setListener' : function(obj, evt, func, bub){
-                obj.addEventListener(evt, func);
+                obj.addEventListener(evt, func, bub);
                 eventListeners.push({
                     'obj' : obj,
                     'evt' : evt,
@@ -142,11 +162,13 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
             },
 
         'showScroll' : function() {
-                if (window.pageYOffset > 200) { dom.scrollTopBtn.classList.remove('show'); dom.scrollTopBtn.classList.add('show'); console.log('added'); }
+                // @BUG doesn't show unless scrolled FROM hidden position
+                if (window.pageYOffset > 200) { dom.scrollTopBtn.classList.add('show'); }
                 else { dom.scrollTopBtn.classList.remove('show'); }
             },
 
         'scrollTop' : function() {
+            console.log('scroll to top');
                 $document.scrollTo(0, 0, 500);
             },
 

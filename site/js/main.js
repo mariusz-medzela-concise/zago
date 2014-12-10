@@ -1,8 +1,10 @@
 $(document).ready(function(){
+
     // Simulate click action on touch screen tap (hopefully)
+    // @BUG not sure if this is really working or not
     $('button#menuButton').on('tap', function(){ $(this).click(); });
 
-    
+    // function to display Modernizr classes (append to end of DOM)    
     function cssTester(){
         var HTMLclasses= $('html')[0].classList;
         var wrap = document.createElement('div');
@@ -119,10 +121,10 @@ app.run(function($rootScope, $state, SiteLoader, Storage, Functions, $window) {
 // Factories / Services / Directives
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Declare sessionStorage
 app.factory('Storage', function(){
     var db = window.localStorage;
     // Test that LocalStorage works, return Angular object if disabled
+    // @BUG this needs to be much more extensive (search for existing Angular storage factory/service)
     try {
         db.testKey = '1';
         delete db.testKey;
@@ -131,11 +133,12 @@ app.factory('Storage', function(){
         return {}; }
 });
 
-// Site Loader
 app.factory('SiteLoader', function($http, $q){
 
+    // Wordpress API call for site post data
     var reqUrl = 'http://admin.zagollc.com/wp-json/posts?filter[posts_per_page]=1000';
 
+    // Custom sorter function to arrange post tree via 'order' property
     function sorter(a,b) {
         if ( a.order < b.order ) return -1;
         if ( a.order > b.order ) return 1;
@@ -143,6 +146,7 @@ app.factory('SiteLoader', function($http, $q){
     }
 
     return {
+        // Call for Site Data, when a promise
         'getRawData' : function(){
             var deferred = $q.defer();
             // If some fucked up IE feature exists, use it
@@ -163,6 +167,7 @@ app.factory('SiteLoader', function($http, $q){
             return deferred.promise;
         },
 
+        // Parse raw site data into data tree to be used with App
         'getPosts' : function(rawData){
 
             console.log('Parse data:');
@@ -366,7 +371,7 @@ app.factory('SiteLoader', function($http, $q){
                 }
 
                 // Retrieve and Store each project's Related Projects info
-                // For each project in Site Tree
+                // For each project in Site Tree once tree has been compiled
                 var projects = tree.project.projects;
                 for (var o = 0; projects.length > o; o++) {
                     var related = projects[o].content.related_projects || [];
@@ -388,8 +393,6 @@ app.factory('SiteLoader', function($http, $q){
                     projects[o].content.related_projects = details;
                 }
 
-                console.log(tree);
-
                 return tree;
             };
 
@@ -397,7 +400,6 @@ app.factory('SiteLoader', function($http, $q){
     }
 });
 
-// javaScript created styles
 app.factory('Styling', function(){
     var div = document.createElement('style');
     div.id = "stylesheet";
@@ -412,11 +414,9 @@ app.factory('Styling', function(){
 
 app.factory("Preloader", function( $q, $rootScope, Storage ) {
 
-    var checkPrompt = function(){
-        if (!Storage.prompted) {
-            document.getElementById('menuPrompt').classList.add('bounce');
-        }
-    };
+    //////////////////////////////////////////////////////////////////////
+    // Custom function to preload array of images [internet find]
+    //////////////////////////////////////////////////////////////////////
 
     Preloader.preload = function( images ) {
         if (images.length) {
@@ -427,6 +427,7 @@ app.factory("Preloader", function( $q, $rootScope, Storage ) {
             console.log('Preloading Images');
 
             // Preload the images; then, update display when returned.
+            // Trigger Angular's onload/compile event upon completion ($emit -> $viewContentLoaded)
             this.preloadImages( images ).then(
                 function handleResolve( imageLocations ) {
 
@@ -436,8 +437,6 @@ app.factory("Preloader", function( $q, $rootScope, Storage ) {
                     $rootScope.$emit('$viewContentLoaded');
 
                     console.log('Preloading Complete');
-
-                    checkPrompt();
                 },
                 function handleReject( imageLocation ) {
 
@@ -451,12 +450,10 @@ app.factory("Preloader", function( $q, $rootScope, Storage ) {
 
                     $rootScope.percentLoaded = event.percent;
 
-                    console.info( "Percent loaded:", event.percent );
+                    // console.info( "Percent loaded:", event.percent );
 
                 }
             );
-        } else {
-            checkPrompt();
         }
 
     };
@@ -693,12 +690,16 @@ app.factory("Preloader", function( $q, $rootScope, Storage ) {
 });
 
 app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $document, $timeout ) {
+    
+    //////////////////////////////////////////////////////////////////////
+    // Methods, Properties and Values Used/Shared throughout entire site
+    //////////////////////////////////////////////////////////////////////
 
-    console.log('Factory: Compiling "Functions"');
 
     // Data Elements
     ////////////////////////////////////////////////////////////////
-    var eventListeners = [];
+    var eventListeners = []; // Store page-specific eventListeners for removal in stateChange
+    var preloadedImages = []; // Store preloaded pageView src's so image loading isn't repeated
 
     // DOM Elements
     ////////////////////////////////////////////////////////////////
@@ -721,7 +722,13 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
         return dom;
     };
 
-    $rootScope.$on('$viewContentLoaded', function(){ dom = getDOM(); });
+    $rootScope.$on('$viewContentLoaded', function(){
+        // Checks to see that image preloading isn't still processing
+        if (!$rootScope.isLoading) {
+            dom = getDOM();
+            checkPrompt();
+        }
+    });
 
     // Helper Functions
     ////////////////////////////////////////////////////////////////
@@ -742,6 +749,14 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
         }, 100);
     };
 
+    function checkPrompt(){
+        // If user hasn't been prompted/clicked the menu, show prompt (else hide)
+        if (!Storage.prompted) { 
+            dom.prompt.classList.remove('bounce');
+            $timeout(function(){ dom.prompt.classList.add('bounce'); }); // $timeout to let class removal trigger first
+        } else { hidePrompt(); }
+    };
+
     function hidePrompt(){
         // Function to hide menuPrompt
         dom.prompt.classList.add('hiding');
@@ -750,6 +765,8 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
         }, 500);
     };
 
+    // AAAAARRRRRRGHGHGHGHGGHGH
+    // @BUG
     function disableScroll(set){
         if (set) {
             dom.body.classList.add('hidden');
@@ -767,12 +784,8 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
     // Object Menthods
     ////////////////////////////////////////////////////////////////
     return {
-
-        'anchorTo' : function(anchor) {
-                var elem = document.getElementById(anchor);
-                var menuHeight = dom.sectionNav.scrollHeight;
-                $document.scrollToElement(elem, menuHeight, '500');
-            },
+    
+        'checkPrompt' : checkPrompt,
 
         'hidePrompt' : hidePrompt,
 
@@ -780,8 +793,13 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
 
         'disableScroll' : disableScroll,
 
+        'anchorTo' : function(anchor) {
+                var elem = document.getElementById(anchor);
+                var menuHeight = dom.sectionNav.scrollHeight;
+                $document.scrollToElement(elem, menuHeight, '500');
+            },
+
         'hideAppElements' : function(){
-            console.log('hiding app elements');
             dom.siteID.style.display = 'none';
             dom.mainNav.style.display = 'none';
             dom.menuBtn.style.display = 'none';
@@ -790,26 +808,21 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
             },
 
         'preloadImages' : function(posts, src) {
-            if (posts.images && !posts.preloaded) {
-                console.log(src);
-                // Preload Images if first time
-                Preloader.preload(posts.images);
-                posts.preloaded = true;
-                // Update Storage object to reflect preload status
-                console.log(JSON.parse(Storage.site));
-                var site = JSON.parse(Storage.site);
-                site[src] = posts;
-                Storage.site = JSON.stringify(site);
-                console.log(JSON.parse(Storage.site));
-            }
+                // @BUG this function is only half-way thought out
+                if (posts.images && !preloadedImages[src]) {
+                    // Preload Images if first time, mark preloaded in local array
+                    Preloader.preload(posts.images);
+                    preloadedImages[src] = true;
+                }
             },
 
         'route' : function(route, turnOff, params) {
+                var params = params || {};
                 var menuOpen = dom.mainNav.classList.contains('menu-open');
                 this.toggleMenu(turnOff);
 
-                if ($state.current.name != route || $state.params != params) {
-
+                // if route is different, or params are different (stringified object comparison), then route to new destination
+                if ($state.current.name != route || JSON.stringify($state.params) != JSON.stringify(params)) {
                     // pause for menu animation if routing while menu was open [500ms menu animation, 50ms toggle delay]
                     if (menuOpen) { setTimeout(function(){ $state.go(route, params); }, 550); }
                     else { $state.go(route, params); }
@@ -838,7 +851,7 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
             },
 
         'showScroll' : function() {
-                // @BUG doesn't show unless scrolled FROM hidden position
+                // @BUG onload dom timing isn't being caught properly
                 if (window.pageYOffset > 200) { dom.scrollTopBtn.classList.add('show'); }
                 else { dom.scrollTopBtn.classList.remove('show'); }
             },
@@ -870,8 +883,8 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
 
         'toggleMenu' : function(turnOff){
 
-                // Delete tree if Shift key is pressed when menuButton clicked
-                try { // Event obj missing in firefox
+                // Delete tree if Shift key is pressed when menuButton clicked (hidden admin function)
+                try {
                     if (event && event.shiftKey && event.target.id == 'menuButton') {
                         reloadSite();
                         return; } }
@@ -918,9 +931,9 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
             },
 
         'viewProject' : function(id){
-                console.log('viewProject clicked: ' + id);
                 this.route('project', true, {'project':id});
             },
+
         'testFunction' : function(test){
                 console.log(test || 'test');
             }
@@ -930,6 +943,12 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
 ////////////////////////////////////////////////////////////////////////////////////
 
 app.directive('grid', function($compile) {
+
+    // This is a really horrible directive to dynamically load the 6-box grid that's
+    // used on the projects overview and team page. I could not figure out how to use
+    // a modulo repeater function with an Angular template to dynamically produce the grid. This
+    // was the best i could come up with at the time. It works, but it's ugly and i don't
+    // like it.
 
     var data, view;
     var linker = function(scope, element, attrs) {
@@ -1087,7 +1106,6 @@ app.directive('grid', function($compile) {
                     }
                 };
             }
-            console.log(project);
             scope.$parent.viewProject(project);
         });
         
@@ -1103,6 +1121,9 @@ app.directive('grid', function($compile) {
 });
 
 app.directive('officeList', function() {
+    
+    // Just an abstratced piece of re-used code
+    ////////////////////////////////////////////////
 
     var linker = function(scope, element, attrs) {
 
@@ -1136,6 +1157,9 @@ app.directive('officeList', function() {
 });
 
 app.directive('socialButtons', function() {
+    
+    // Another abstratced piece of re-used code
+    ////////////////////////////////////////////////
 
     var linker = function(scope, element, attrs) {
         scope.socials = [
@@ -1187,6 +1211,10 @@ app.directive('socialButtons', function() {
 
 app.directive('homeSections', function() {
     
+    // Dynamically grab and set the home section's
+    // key words and highlight colors
+    ////////////////////////////////////////////////
+    
     var linker = function(scope, element, attrs) {
         // scope.banner_caption.first = 
         var words = scope.section.content.image_caption.trim().split(" ");
@@ -1207,6 +1235,8 @@ app.directive('homeSections', function() {
 });
 
 app.directive('underZ', function() {
+
+    // Add to any element where an "underlined Z" may be used
     
     var linker = function(scope, element, attrs) {
         element[0].innerHTML = scope.str.replaceAll(' Z ', ' <u class="z">Z</u> ');
@@ -1234,9 +1264,6 @@ app.controller('AppCtrl', function($scope, $rootScope, Functions, Storage){
 
     // Show/Hide ScrollToTop button functionality
     window.addEventListener('scroll', Functions.throttle(Functions.showScroll, 200));
-    
-    // hide menuPrompt if user has already opened menu
-    if (Storage.prompted) { Functions.hidePrompt(); }
 
     // Splash Page configuration
     ////////////////////////////////////////////////////////////////////////////////////
@@ -1254,8 +1281,6 @@ app.controller('AppCtrl', function($scope, $rootScope, Functions, Storage){
         $scope.showSplash = false;
         Functions.disableScroll(false);
     };
-
-    console.log($rootScope);
 
 });
 
@@ -1279,9 +1304,8 @@ app.controller('HomeCtrl', function($scope, $rootScope, $timeout, $interval, Fun
         if (!$rootScope.isLoading && $rootScope.pageView == 'homePage' && !doneOnce) {
             doneOnce = true;
             try { // Workaround for $rootScope.$on checking on every view instead of just homePage
-                console.log('set homepage stuff');
                 $scope.rotateHeros();
-                setDimensions();
+                setDimensions(); // @BUG This is firing before DOM is fully loaded
                 pinMenu();
                 Functions.setListener(window, 'scroll', Functions.throttle(pinMenu, 10));
                 Functions.setListener(window, 'resize', Functions.throttle(setDimensions, 10)); }
@@ -1358,7 +1382,7 @@ app.controller('HomeCtrl', function($scope, $rootScope, $timeout, $interval, Fun
         var slideTiming = 1500; // CSS transition timing
 
         // Set rotation interval
-        $interval(function(){
+        $interval(function(){ // @BUG This is acting funny, 95% working, but has some weird issues
             $scope.lastBanner = $scope.activeBanner;
             // If img is last in array, set NEXT to first image, else set to next image in array
             if (($scope.activeBanner+1) == images.length) { $scope.activeBanner = 0; }
@@ -1435,7 +1459,7 @@ app.controller('ProjectDetailCtrl', function($scope, $rootScope, $stateParams, S
 
 });
 
-app.controller('TeamCtrl', function($scope, $rootScope, Preloader, Storage){
+app.controller('TeamCtrl', function($scope, $rootScope, Functions, Preloader, Storage){
 
     $rootScope.pageView = "teamPage";
 
@@ -1443,7 +1467,8 @@ app.controller('TeamCtrl', function($scope, $rootScope, Preloader, Storage){
     $scope.blurb = posts.blurb[0];
     $scope.members = posts.members.shuffle();
 
-    Preloader.preload(posts.images);
+    // Preloader.preload(posts.images);
+    Functions.preloadImages(posts, 'team');
 
 });
 

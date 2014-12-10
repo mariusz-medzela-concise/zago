@@ -310,6 +310,8 @@ footer {
 						 } } } }
 	&.lovePage {
 		display: none; }
+	&.pageLoading {
+		display: none; }
 }
 
 /*************************************************/
@@ -318,7 +320,6 @@ footer {
 
 #container {
 	width: 100%;
-	min-height: 100em;
 	min-height: 100vh;
 	position: relative;
 	opacity: 1;
@@ -329,6 +330,7 @@ footer {
 	@include transition(all);
 	&.pageLoading {
 		@include translate(100%);
+		/*opacity: 0;*/
 	}
 }
 
@@ -374,11 +376,17 @@ footer {
 			box-shadow: 0 0 50px #fff, inset 0 0 50px #fff; }
 		&:after {
 			z-index: 1;
-			-webkit-animation: beacon 2s infinite 1s; }
+			-webkit-animation: beacon 2s infinite 1s;
+			-moz-animation: beacon 2s infinite 1s;
+			-o-animation: beacon 2s infinite 1s;
+			animation: beacon 2s infinite 1s; }
 
 		&:before {
 			z-index: 2;
-			-webkit-animation: beacon 2s infinite; }
+			-webkit-animation: beacon 2s infinite;
+			-moz-animation: beacon 2s infinite;
+			-o-animation: beacon 2s infinite;
+			animation: beacon 2s infinite; }
 
 	}
 }
@@ -1279,8 +1287,9 @@ nav {
 			left: 0;
 			width: 100%;
 			height: 100%;
-			height: 100vh;
-		}
+			height: 100vh; } }
+	&.pageLoading {
+		display: none;
 	}
 }
 

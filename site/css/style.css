@@ -472,13 +472,15 @@ footer.homePage section.social p {
 footer.lovePage {
   display: none;
 }
+footer.pageLoading {
+  display: none;
+}
 
 /*************************************************/
 /* Wrapper Styles
 /*************************************************/
 #container {
   width: 100%;
-  min-height: 100em;
   min-height: 100vh;
   position: relative;
   opacity: 1;
@@ -498,6 +500,7 @@ footer.lovePage {
   -ms-transform: translate(100%, 0);
   -o-transform: translate(100%, 0);
   transform: translate(100%, 0);
+  /*opacity: 0;*/
 }
 
 #pageContent {
@@ -546,10 +549,16 @@ footer.lovePage {
 .beaconWrapper .beacon:after {
   z-index: 1;
   -webkit-animation: beacon 2s infinite 1s;
+  -moz-animation: beacon 2s infinite 1s;
+  -o-animation: beacon 2s infinite 1s;
+  animation: beacon 2s infinite 1s;
 }
 .beaconWrapper .beacon:before {
   z-index: 2;
   -webkit-animation: beacon 2s infinite;
+  -moz-animation: beacon 2s infinite;
+  -o-animation: beacon 2s infinite;
+  animation: beacon 2s infinite;
 }
 
 @-webkit-keyframes beacon {
@@ -1795,6 +1804,9 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
   width: 100%;
   height: 100%;
   height: 100vh;
+}
+#pageContent.pageLoading {
+  display: none;
 }
 
 #projectDetailsWrapper {
