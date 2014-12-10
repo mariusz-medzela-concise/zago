@@ -1164,13 +1164,14 @@ nav {
 				&:hover {
 					.imgWrapper {
 						img {
-							&:last-of-type {
-								z-index: 200; } } } }
+							&:first-of-type {
+								opacity: 0; } } } }
 				.imgWrapper {
 					height: 90em;
 					height: 90vw;
 					position: relative;
 					img {
+						@include transition(opacity);
 						min-height: 90em;
 						min-height: 90vw;
 						&:first-of-type {

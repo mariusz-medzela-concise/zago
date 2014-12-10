@@ -23,6 +23,8 @@
 </head>
 
 <body id="body" ng-controller="AppCtrl">
+    <!-- @BUG {pageLoading:isLoading || isRouting} controls the page view sliding offscreen to the right -->
+    <!-- It works, but its very buggy. Basically CSS animates the page in/out based on Angular value -->
     <div id="container" ng-class="{pageLoading:isLoading || isRouting}">
 
         <img id="siteID" class="siteID" alt="Zago LLC Logo" src="images/zago_logo.png" ng-click="route('home', true)">

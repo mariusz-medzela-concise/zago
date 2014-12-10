@@ -1645,8 +1645,8 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
 .gridWrapper.teamWrapper .grid section > * {
   cursor: auto;
 }
-.gridWrapper.teamWrapper .grid section:hover .imgWrapper img:last-of-type {
-  z-index: 200;
+.gridWrapper.teamWrapper .grid section:hover .imgWrapper img:first-of-type {
+  opacity: 0;
 }
 .gridWrapper.teamWrapper .grid section .imgWrapper {
   height: 90em;
@@ -1654,6 +1654,11 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
   position: relative;
 }
 .gridWrapper.teamWrapper .grid section .imgWrapper img {
+  -webkit-transition: opacity 0.5s ease-out;
+  -moz-transition: opacity 0.5s ease-out;
+  -ms-transition: opacity 0.5s ease-out;
+  -o-transition: opacity 0.5s ease-out;
+  transition: opacity 0.5s ease-out;
   min-height: 90em;
   min-height: 90vw;
 }
