@@ -1524,8 +1524,7 @@ app.controller('TeamCtrl', function($scope, $rootScope, Functions, Preloader, St
     $scope.blurb = posts.blurb[0];
     $scope.members = posts.members.shuffle();
 
-    // Preloader.preload(posts.images);
-    Functions.preloadImages(posts, 'team');
+    Preloader.preload(posts.images);
 
 });
 
@@ -1553,11 +1552,3 @@ app.controller('LegacyCtrl', function($scope, $rootScope, $state, Functions, Sto
     Functions.hideAppElements();
 
 });
-
-
-
-
-
-
-
-
