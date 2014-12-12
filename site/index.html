@@ -82,7 +82,10 @@
     </div>
     <div id="loader">
         <div class="beaconWrapper">
-            <div class="beacon"></div>
+            <div class="beacon">
+                <div class="percentComplete" style="width:{{percentLoaded-10}}%; height:{{percentLoaded-10}}%;"></div>
+                <!-- <p>{{percentLoaded}}%</p> -->
+            </div>
         </div>
     </div> 
     <script src="http://localhost:35729/livereload.js"></script> 

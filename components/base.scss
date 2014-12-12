@@ -61,6 +61,17 @@ $menuButtonColors: $blue, $yellow, $pink, $green;
 	transform: translate($x, $y);
 }
 
+@mixin transform($action, $origin) {
+  -webkit-transform: $action;
+  -webkit-transform-origin: $origin;
+  -moz-transform: $action;
+  -moz-transform-origin: $origin;
+  -o-transform: $action;
+  -o-transform-origin: $origin;
+  transform: $action;
+  transform-origin: $origin;
+}
+
 @mixin animateTranslate($duration: .5s, $easing : ease-out) {
   -webkit-transition: -webkit-translate $duration $easing;
   -moz-transition: -moz-translate $duration $easing;
@@ -77,12 +88,33 @@ $menuButtonColors: $blue, $yellow, $pink, $green;
 	animation: $animations;
 }
 
+@mixin borderRadius($int : 0) {
+  -webkit-border-radius: $int;
+  -moz-border-radius: $int;
+  -o-border-radius: $int;
+  border-radius: $int;
+}
+
 @mixin keyframes($name) {
 	@-webkit-keyframes $name { @content; }
 	@-moz-keyframes $name { @content; }
 	@-ms-keyframes $name { @content; }
 	@-o-keyframes $name { @content; }
 	@keyframes $name { @content; }
+}
+
+@mixin columns($count : 0, $gap : 0px, $rule : 0) {
+  -webkit-column-count: $count;
+  -moz-column-count: $count;
+  column-count: $count;
+
+  -webkit-column-gap: $gap;
+  -moz-column-gap: $gap;
+  column-gap: $gap;
+
+  -webkit-column-rule: $rule;
+  -moz-column-rule: $rule;
+  column-rule: $rule;
 }
 
 /*************************************************/

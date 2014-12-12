@@ -13,8 +13,69 @@
 	</ul>
 </nav>
 
-<div id="projectDetailsWrapper">
-
-
-
+<div id="projectLayout">
+	<div class="featuredImage">
+		<img ng-src="{{project.content.featured_image}}">
+	</div>
+	<div class="projectContent">
+		<h1 ng-bind-html="project.title"></h1>
+		<div class="projectDetails">
+			<div class="projectInfo">
+				<section>
+					<h2>Client</h2>
+					<p>{{project.content.client}}</p>
+				</section>
+				<section ng-if="project.content.project">
+					<h2>Project</h2>
+					<p>{{project.content.project}}</p>
+				</section>
+				<section ng-if="project.content.services">
+					<h2>Services</h2>
+					<p>{{project.content.services}}</p>
+				</section>
+				<section ng-repeat="detail in project.content.other_details">
+					<h2>{{detail.title}}</h2>
+					<p>{{detail.detail}}</p>
+				</section>
+			</div>
+			<a class="clientSite" href="{{project.content.url}}">Visit Website</a>
+			<div class="socialAccounts" ng-if="project.content.social_media.length">
+				<ul class="socialButtons">
+					<li ng-repeat="social in project.content.social_media"
+						ng-class="{
+							fb_btn: social.account.toLowerCase() == 'facebook',
+							tw_btn: social.account.toLowerCase() == 'twitter',
+							be_btn: social.account.toLowerCase() == 'behance',
+							pi_btn: social.account.toLowerCase() == 'pinterest',
+							li_btn: social.account.toLowerCase() == 'linkedin',
+							tr_btn: social.account.toLowerCase() == 'tumblr',
+							ma_btn: social.account.toLowerCase() == 'mail'
+						}"
+					>
+						<a href="{{social.url}}"></a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<div class="projectBody" ng-bind-html="project.body"></div>
+	</div>
 </div>
+
+<div id="projectImages">
+	<section ng-repeat="section in imageSections">
+		<h3>{{section.label}}</h3>
+		<div class="imageWrapper">
+			<div ng-repeat="image in section.images" class="imageBox" ng-class="{halfImage: section.images.length > 1}">
+				<img ng-src="{{image.url}}" alt="{{image.alt}}">
+			</div>
+		</div>
+	</section>
+</div>
+
+
+
+
+
+
+
+

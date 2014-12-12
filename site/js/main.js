@@ -224,7 +224,7 @@ app.factory('SiteLoader', function($http, $q){
                             'id' : post.ID,
                             'title' : ternValue(post.title),
                             'order' : ternValue(post.acf.arrangement),
-                            'body' : ternValue(post.content),
+                            'body' : ternValue(post.acf.content),
                             'content' : { }
                         };
                         
@@ -267,18 +267,14 @@ app.factory('SiteLoader', function($http, $q){
                         }
 
                         if (post.terms.category[0].slug == 'home-blurb') {
-                            // temp.content = {
-                                
-                            // };
+                            temp.body = ternValue(post.content);
 
                             tree.home.blurb.push(temp);
                             continue;
                         }
 
                         if (post.terms.category[0].slug == 'projects-blurb') {
-                            // temp.content = {
-
-                            // };
+                            temp.body = ternValue(post.content);
 
                             tree.project.blurb.push(temp);
                             continue;
@@ -295,8 +291,17 @@ app.factory('SiteLoader', function($http, $q){
                                 'featured_image' : (post.acf.featured_image && !post.acf.case_study) ? post.acf.featured_image.url : (post.acf.images[0].image.url || null),
                                 'related_projects' : ternValue(post.acf.related_projects),
                                 'read_about' : ternValue(post.acf.read_about),
+                                'other_details' : [],
+                                'social_media' : [],
                                 'images' : []
+                            };
 
+                            // Extract Social Media information
+                            for (var s = 0; post.acf.social_media.length > s; s++) {
+                                temp.content.social_media.push({
+                                    'account' : ternValue(post.acf.social_media[s].account),
+                                    'url' : ternValue(post.acf.social_media[s].url)
+                                });
                             };
 
                             // Get project images outside of repeater array (if case study IS selected)
@@ -336,6 +341,16 @@ app.factory('SiteLoader', function($http, $q){
                                 temp.content.images.push(obj);
                             }
 
+                            // Extract extra project details
+                            if (post.acf.other_details && post.acf.other_details.length) {
+                                for (var det = 0; post.acf.other_details.length > det; det++) {
+                                    temp.content.other_details.push({
+                                        'title' : post.acf.other_details[det].title,
+                                        'detail' : post.acf.other_details[det].details
+                                    });
+                                };
+                            }
+
                             tree.project.images.push(temp.content.featured_image);
                             tree.project.projects.push(temp);
 
@@ -346,8 +361,7 @@ app.factory('SiteLoader', function($http, $q){
                         }
 
                         if (post.terms.category[0].slug == 'team-blurb') {
-                            // temp.content = {
-                            // };
+                            temp.body = ternValue(post.content);
 
                             tree.team.blurb.push(temp);
                             continue;
@@ -450,7 +464,7 @@ app.factory("Preloader", function( $q, $rootScope, Storage ) {
 
                     $rootScope.percentLoaded = event.percent;
 
-                    // console.info( "Percent loaded:", event.percent );
+                    console.info( "Percent loaded:", event.percent );
 
                 }
             );
@@ -1423,39 +1437,82 @@ app.controller('ProjectDetailCtrl', function($scope, $rootScope, $stateParams, S
 
     // Get CURRENT, NEXT & PERVIOUS project IDs based on SITE TREE position (Project Sub-Nav)
     ////////////////////////////////////////////////////////////////////////////////////
-    (function setProjectNavigation(){
-        for (var i = 0; posts.projects.length > i; i++) {
-            if (posts.projects[i].id == $stateParams.project) {
-                $scope.project = posts.projects[i];
-                if (i == 0) { // If THIS project is the first one
-                    $scope.nextProject = posts.projects[(i+1)];
-                    $scope.prevProject = posts.projects[(posts.projects.length-1)];
-                } else if (i == (posts.projects.length - 1)) { // If THIS project is the last one
+    $scope.project = null;
+    for (var i = 0; posts.projects.length > i; i++) {
+        if (posts.projects[i].id == $stateParams.project) {
+            $scope.project = posts.projects[i];
+            if (i == 0) { // If THIS project is the first one
+                $scope.nextProject = posts.projects[(i+1)];
+                $scope.prevProject = posts.projects[(posts.projects.length-1)];
+            } else if (i == (posts.projects.length - 1)) { // If THIS project is the last one
+                $scope.nextProject = posts.projects[(0)];
+                $scope.prevProject = posts.projects[(i-1)];
+            } else { // If THIS project is any of the interior ones
+                $scope.nextProject = posts.projects[(i+1)];
+                $scope.prevProject = posts.projects[(i-1)];
+            }
+
+            // if there are less than 3 projects in the site tree
+            if (posts.projects.length < 3) {
+                if (i == 0) {
+                    $scope.nextProject = posts.projects[(1)];
+                    $scope.prevProject = posts.projects[(0)]; }
+                else {
                     $scope.nextProject = posts.projects[(0)];
-                    $scope.prevProject = posts.projects[(i-1)];
-                } else { // If THIS project is any of the interior ones
-                    $scope.nextProject = posts.projects[(i+1)];
-                    $scope.prevProject = posts.projects[(i-1)];
-                }
+                    $scope.prevProject = posts.projects[(1)]; }
+            }
 
-                // if there are less than 3 projects in the site tree
-                if (posts.projects.length < 3) {
-                    if (i == 0) {
-                        $scope.nextProject = posts.projects[(1)];
-                        $scope.prevProject = posts.projects[(0)]; }
-                    else {
-                        $scope.nextProject = posts.projects[(0)];
-                        $scope.prevProject = posts.projects[(1)]; }
-                }
+            break;
+        }
+    }
 
-                break;
-        }   }
-    })();
+    // If project exists, extract image urls and preload images
+    if ($scope.project) {
+        var images = [];
+        var imageURLs = [];
 
-    // Redirect back to projects overview page if project or site tree doesn't exist, else preload images
-    ////////////////////////////////////////////////////////////////////////////////////
-    if (!$scope.project) { $scope.route('projects', true); }
-    else { Preloader.preload($scope.project.content.images); }
+        for (var p = 0; $scope.project.content.images.length >p; p++) {
+            images.push($scope.project.content.images[p]);
+            imageURLs.push($scope.project.content.images[p].url);
+        };
+
+        // Preloader.preload(imageURLs);
+
+        // Construct Image Object
+        ///////////////////////////////////////////////////////
+        images.shift(); // Remove Featured Image from object
+        $scope.imageSections = [];
+        for (var o = 0; images.length > o; o++) {
+            console.dir(images[o]);
+            var temp = {
+                'label' : images[o].label,
+                'order' : images[o].order,
+                'images' : [{
+                    'url' : images[o].url,
+                    'alt' : images[o].alt
+                }]
+            };
+
+            // If this Image and Next Image are part of a pair
+            // Then Advance loop $index ahead by one and pair img urls together
+            if (images[o].half && images[o+1].half) {
+                o++;
+                temp.images.push({
+                    'url' : images[o].url,
+                    'alt' : images[o].alt
+                });
+            }
+
+            $scope.imageSections.push(temp);
+        };
+
+        console.log($scope.imageSections);
+
+        ///////////////////////////////////////////////////////
+    // Else redirect back to projects overview page
+    } else { $scope.route('projects', true); }
+    
+    console.log($scope.project);
 
 });
 
