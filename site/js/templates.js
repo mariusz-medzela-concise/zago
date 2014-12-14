@@ -55,7 +55,7 @@ angular.module('app').run(['$templateCache', function($templateCache) {
     "\t\t\t\t\t\t\tli_btn: social.account.toLowerCase() == 'linkedin',\n" +
     "\t\t\t\t\t\t\ttr_btn: social.account.toLowerCase() == 'tumblr',\n" +
     "\t\t\t\t\t\t\tma_btn: social.account.toLowerCase() == 'mail'\n" +
-    "\t\t\t\t\t\t}\"><a href={{social.url}}></a></li></ul></div></div><div class=projectBody ng-bind-html=project.body></div></div></div><div id=projectImages><section ng-repeat=\"section in imageSections\"><h3>{{section.label}}</h3><div class=imageWrapper><div ng-repeat=\"image in section.images\" class=imageBox ng-class=\"{halfImage: section.images.length > 1}\"><img ng-src={{image.url}} alt={{image.alt}}></div></div></section></div>"
+    "\t\t\t\t\t\t}\"><a href={{social.url}}></a></li></ul></div></div><div class=projectBody ng-bind-html=project.body></div></div></div><div id=projectImages><section ng-repeat=\"section in imageSections\"><h3>{{section.label}}</h3><div class=imageWrapper><div ng-repeat=\"image in section.images\" class=imageBox ng-class=\"{halfImage: section.images.length > 1}\"><img ng-src={{image.url}} alt={{image.alt}}></div></div></section></div><div id=readAbout><section ng-repeat=\"story in project.content.read_about\"><a href={{story.url}} target=_blank><p>{{story.title}}</p><h3>{{story.source}}</h3></a></section></div><div id=relatedProjects><section ng-repeat=\"related in project.content.related_projects\" ng-click=viewProject(related.id)><div class=imgWrapper><img ng-src={{related.image}}></div><p>{{related.title}}</p><h3>{{related.client}}</h3></section></div>"
   );
 
 

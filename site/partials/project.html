@@ -72,6 +72,25 @@
 	</section>
 </div>
 
+<div id="readAbout">
+	<section ng-repeat="story in project.content.read_about">
+		<a href="{{story.url}}" target="_blank">
+			<p>{{story.title}}</p>
+			<h3>{{story.source}}</h3>
+		</a>
+	</section>
+</div>
+
+<div id="relatedProjects">
+	<section ng-repeat="related in project.content.related_projects" ng-click="viewProject(related.id)">
+		<div class="imgWrapper">
+			<img ng-src="{{related.image}}">
+		</div>
+		<p>{{related.title}}</p>
+		<h3>{{related.client}}</h3>
+	</section>
+</div>
+
 
 
 
