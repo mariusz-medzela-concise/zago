@@ -224,7 +224,7 @@ app.factory('SiteLoader', function($http, $q){
                             'id' : post.ID,
                             'title' : ternValue(post.title),
                             'order' : ternValue(post.acf.arrangement),
-                            'body' : ternValue(post.acf.content),
+                            'body' : post.acf.content ? post.acf.content : post.content,
                             'content' : { }
                         };
                         
