@@ -74,7 +74,7 @@ app.run(function($rootScope, $state, SiteLoader, Storage, Functions, $window) {
 
     $rootScope.$on('$stateChangeStart', function(event, to, toParams, from, fromParams){
 
-        $rootScope.isRouting = true;
+
         
         // If the Site Data is missing, stop navigation and retreive data
         // Cache timer for Storage (24hrs: 86400000 1hr: 3600000 1min: 60000)
@@ -107,13 +107,8 @@ app.run(function($rootScope, $state, SiteLoader, Storage, Functions, $window) {
     });
 
     $rootScope.$on( "$stateChangeSuccess", function(event, to, toParams, from, fromParams) {
-        
-        $rootScope.isRouting = false;
 
-        // Add/Remove page class to footer element
-        document.getElementsByTagName('footer')[0].className = '';
-        if (to.name == 'home') { document.getElementsByTagName('footer')[0].classList.add('homePage'); }
-        if (to.name == 'love') { document.getElementsByTagName('footer')[0].classList.add('lovePage'); }
+
     });
 });
 
@@ -133,7 +128,7 @@ app.factory('Storage', function(){
         return {}; }
 });
 
-app.factory('SiteLoader', function($http, $q){
+app.factory('SiteLoader', function($http, $q, $rootScope){
 
     // Wordpress API call for site post data
     var reqUrl = 'http://admin.zagollc.com/wp-json/posts?filter[posts_per_page]=1000';
@@ -148,6 +143,9 @@ app.factory('SiteLoader', function($http, $q){
     return {
         // Call for Site Data, when a promise
         'getRawData' : function(){
+
+            $rootScope.isLoading = true;
+            
             var deferred = $q.defer();
             // If some fucked up IE feature exists, use it
             if(window.XDomainRequest){
@@ -287,25 +285,18 @@ app.factory('SiteLoader', function($http, $q){
                                 'client' : ternValue(post.acf.client),
                                 'services' : ternValue(post.acf.services),
                                 'project' : ternValue(post.acf.project),
+                                'other_details' : ternValue(post.acf.other_details),
                                 'project_url' : ternValue(post.acf.project_url),
-                                'featured_image' : (post.acf.featured_image && !post.acf.case_study) ? post.acf.featured_image.url : (post.acf.images[0].image.url || null),
-                                'related_projects' : ternValue(post.acf.related_projects),
+                                'social_media' : ternValue(post.acf.social_media),
                                 'read_about' : ternValue(post.acf.read_about),
-                                'other_details' : [],
-                                'social_media' : [],
+                                'related_projects' : ternValue(post.acf.related_projects),
+                                'featured_image' : {},
+                                'image_sections' : [],
                                 'images' : []
                             };
 
-                            // Extract Social Media information
-                            for (var s = 0; post.acf.social_media.length > s; s++) {
-                                temp.content.social_media.push({
-                                    'account' : ternValue(post.acf.social_media[s].account),
-                                    'url' : ternValue(post.acf.social_media[s].url)
-                                });
-                            };
-
-                            // Get project images outside of repeater array (if case study IS selected)
-                            if (post.acf.images && post.acf.case_study == true) {
+                            // Get project images outside of repeater array                       
+                            if (post.acf.images && post.acf.images.length) {
                                 for (var d = 0; post.acf.images.length > d; d++) {
                                     var obj = {
                                         'url' : post.acf.images[d].image.url,
@@ -315,45 +306,16 @@ app.factory('SiteLoader', function($http, $q){
                                         'half' : post.acf.images[d].half,
                                     };
 
-                                    // Check if object exists in tree already
-                                    for (image in temp.content.images) {
-                                        if (image.url == obj.url && image.order == obj.order) {
-                                            var urlExists = true;
-                                            break;
-                                    }   }
+                                    // Skip first image (featured image)
+                                    if (d > 0) { temp.content.image_sections.push(obj); }
+                                    else { temp.content.featured_image = obj; }
 
-                                    // If new image obj, add to tree
-                                    if (!urlExists) { temp.content.images.push(obj); }
-                                    
+                                    temp.content.images.push(obj.url);
                                 }
                             }
 
-                            // Get project images from featured image (if case study NOT selected)
-                            if (post.acf.featured_image && temp.content.case_study == false) {
-                                var obj = {
-                                    'url' : post.acf.featured_image.url,
-                                    'alt' : post.acf.featured_image.alt,
-                                    'label' : 'Featured Image',
-                                    'order' : 1,
-                                    'half' : false,
-                                };
-
-                                temp.content.images.push(obj);
-                            }
-
-                            // Extract extra project details
-                            if (post.acf.other_details && post.acf.other_details.length) {
-                                for (var det = 0; post.acf.other_details.length > det; det++) {
-                                    temp.content.other_details.push({
-                                        'title' : post.acf.other_details[det].title,
-                                        'detail' : post.acf.other_details[det].details
-                                    });
-                                };
-                            }
-
-                            tree.project.images.push(temp.content.featured_image);
+                            tree.project.images.push(temp.content.featured_image.url);
                             tree.project.projects.push(temp);
-
                             // Sort projects object via arrangement parameter
                             tree.project.projects.sort(sorter);
 
@@ -402,15 +364,19 @@ app.factory('SiteLoader', function($http, $q){
                                     'image' : projects[r].content.featured_image
                                 };
                                 details.push(obj);
-                                break; } } }
+                                projects[o].content.images.push(obj.image.url);
+                                break;
+                    }   }   }
                     // Assign/Push new Related Pojects obj into tree
                     projects[o].content.related_projects = details;
                 }
-
+                console.log(tree);
                 return tree;
             };
 
-            return postTree(rawData); }
+            $rootScope.isLoading = false;
+            return postTree(rawData);
+        }
     }
 });
 
@@ -426,13 +392,26 @@ app.factory('Styling', function(){
     }
 });
 
-app.factory("Preloader", function( $q, $rootScope, Storage ) {
+app.factory("Preloader", function( $q, $rootScope, $timeout, Storage ) {
 
     //////////////////////////////////////////////////////////////////////
     // Custom function to preload array of images [internet find]
     //////////////////////////////////////////////////////////////////////
 
     Preloader.preload = function( images ) {
+
+        // Track whether css transition timing has had chance to finish
+        //////////////////////////////////////////////////////////////////////
+        var transitionComplete = false;
+        var transitionTiming = 750; // CSS transition timing (500ms)
+        $timeout(function(){ transitionComplete = true; }, transitionTiming);
+
+        function checkTransition() {
+            console.log('checking: ' + transitionComplete);
+            if (transitionComplete) { $rootScope.isLoading = false; }
+            else { $timeout(function(){ checkTransition(); }, 50); }
+        };
+
         if (images.length) {
             // I keep track of the state of the loading images.
             $rootScope.isLoading = true;
@@ -446,7 +425,7 @@ app.factory("Preloader", function( $q, $rootScope, Storage ) {
                 function handleResolve( imageLocations ) {
 
                     // Loading was successful.
-                    $rootScope.isLoading = false;
+                    checkTransition();
                     $rootScope.isSuccessful = true;
                     $rootScope.$emit('$viewContentLoaded');
 
@@ -455,7 +434,7 @@ app.factory("Preloader", function( $q, $rootScope, Storage ) {
                 function handleReject( imageLocation ) {
 
                     // Loading failed on at least one image.
-                    $rootScope.isLoading = false;
+                    checkTransition();
                     $rootScope.isSuccessful = false;
                     $rootScope.$emit('$viewContentLoaded');
 
@@ -958,96 +937,96 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
 
 // app.directive('grid', function($compile, $http, $templateCache) {
 
-//     function newDiv(classes) {
-//         var elem = document.createElement('div');
-//         elem.setAttribute('class', classes || '');
+    //     function newDiv(classes) {
+    //         var elem = document.createElement('div');
+    //         elem.setAttribute('class', classes || '');
 
-//         return elem;
-//     };
+    //         return elem;
+    //     };
 
-//     var getTemplate = function(contentType) {
-//         var baseUrl = '../pieces/';
-//         var templateMap = {
-//             members: 'team_section.html',
-//             projects: 'project_section.html'
-//         };
+    //     var getTemplate = function(contentType) {
+    //         var baseUrl = '../pieces/';
+    //         var templateMap = {
+    //             members: 'team_section.html',
+    //             projects: 'project_section.html'
+    //         };
 
-//         var templateUrl = baseUrl + templateMap[contentType];
-//         var templateLoader = $http.get(templateUrl, {cache: $templateCache});
+    //         var templateUrl = baseUrl + templateMap[contentType];
+    //         var templateLoader = $http.get(templateUrl, {cache: $templateCache});
 
-//         return templateLoader;
+    //         return templateLoader;
 
-//     }
+    //     }
 
-//     var linker = function(scope, element, attrs) {
+    //     var linker = function(scope, element, attrs) {
 
-//         function parseSections(sections, template){
+    //         function parseSections(sections, template){
 
-//             var wrapper = newDiv('directiveElement');
-//             var i, gridWrapper, gridSection, section;
+    //             var wrapper = newDiv('directiveElement');
+    //             var i, gridWrapper, gridSection, section;
 
-//             for(i = 0; sections.length > i; i++ ) {
+    //             for(i = 0; sections.length > i; i++ ) {
 
-//                 section = newDiv('ngTemplate '+i); // dummy for sections[i] (ngTemplate)
+    //                 section = newDiv('ngTemplate '+i); // dummy for sections[i] (ngTemplate)
 
-//                 // for Every 3 sections (or the first) create a new .grid div
-//                 if (i % 3 == 0) {  
-//                     gridSection = newDiv('grid');
-//                     // If its a new set of 6 (or the first)
-//                     if (i % 6 == 0) { 
-//                         // create new .gridWrapper and set .grid to .gridLeft
-//                         gridWrapper = newDiv('gridWrapper');
-//                         wrapper.appendChild(gridWrapper);
-//                         gridSection.classList.add('gridLeft');
-//                     // if its the second set of 3, just set .grid to .gridRight
-//                     } else { gridSection.classList.add('gridRight'); }
+    //                 // for Every 3 sections (or the first) create a new .grid div
+    //                 if (i % 3 == 0) {  
+    //                     gridSection = newDiv('grid');
+    //                     // If its a new set of 6 (or the first)
+    //                     if (i % 6 == 0) { 
+    //                         // create new .gridWrapper and set .grid to .gridLeft
+    //                         gridWrapper = newDiv('gridWrapper');
+    //                         wrapper.appendChild(gridWrapper);
+    //                         gridSection.classList.add('gridLeft');
+    //                     // if its the second set of 3, just set .grid to .gridRight
+    //                     } else { gridSection.classList.add('gridRight'); }
 
-//                     gridWrapper.appendChild(gridSection);
-//                 }
+    //                     gridWrapper.appendChild(gridSection);
+    //                 }
 
-//                 // Populate/link template data and append to wrap system
-//                 gridSection.appendChild(section);  
-//             };
+    //                 // Populate/link template data and append to wrap system
+    //                 gridSection.appendChild(section);  
+    //             };
 
-//             return wrapper;
+    //             return wrapper;
 
-//         };
+    //         };
 
-//         // Retieve gridType and scope[sections] from element data attribute
-//         var gridType = element[0].dataset.grid;
-//         var sections = scope.$parent[gridType];
-//         var loader = getTemplate(gridType);
+    //         // Retieve gridType and scope[sections] from element data attribute
+    //         var gridType = element[0].dataset.grid;
+    //         var sections = scope.$parent[gridType];
+    //         var loader = getTemplate(gridType);
 
-//         var promise = loader.success(function(html) {
-//                     element.html(html);
-//             }).then(function (response) {
-                
-//                 console.log(element);
-//                 element.replaceWith($compile(element.html())(scope));
-//                 console.log(element);
-//             });
+    //         var promise = loader.success(function(html) {
+    //                     element.html(html);
+    //             }).then(function (response) {
+                    
+    //                 console.log(element);
+    //                 element.replaceWith($compile(element.html())(scope));
+    //                 console.log(element);
+    //             });
 
-//         // var promise = loader.success(function(html) {
-//         //         element.html(parseSections(sections, html, scope));
-//         //     }).then(function (response) {
-                
-//         //         console.log(element);
-//         //         element.replaceWith($compile(element.html())(scope));
-//         //         console.log(element);
-//         //     });
-//     };
+    //         // var promise = loader.success(function(html) {
+    //         //         element.html(parseSections(sections, html, scope));
+    //         //     }).then(function (response) {
+                    
+    //         //         console.log(element);
+    //         //         element.replaceWith($compile(element.html())(scope));
+    //         //         console.log(element);
+    //         //     });
+    //     };
 
-//     return {
-//         restrict: "E",
-//         link: linker,
+    //     return {
+    //         restrict: "E",
+    //         link: linker,
 
-//         scope: {
-//             content:'='
-//         }
-//     };
+    //         scope: {
+    //             content:'='
+    //         }
+    //     };
 
 
-// });
+    // });
 
 
 
@@ -1115,7 +1094,7 @@ app.directive('grid', function($compile) {
                 imgWrap.setAttribute('class', 'imgWrapper');
                 // Create Img Element
                 var img = document.createElement('img');
-                img.setAttribute('ng-src', data.content.featured_image); // @todo fix projects bug
+                img.setAttribute('ng-src', data.content.featured_image.url || data.content.featured_image); // @todo fix projects bug
                 imgWrap.appendChild(img);
                 if (data.content.funny_picture) {
                     var img2 = document.createElement('img');
@@ -1177,7 +1156,7 @@ app.directive('grid', function($compile) {
                             }
 
                             account = document.createElement('li');
-                            account.setAttribute('class', 'anchorWrapper invert ' + linkClass);
+                            account.setAttribute('class', 'anchorWrapper invert invertHover ' + linkClass);
 
                             anchor = document.createElement('a');
                             anchor.setAttribute('href', data.content.accounts[d].url);
@@ -1600,45 +1579,38 @@ app.controller('ProjectDetailCtrl', function($scope, $rootScope, $stateParams, S
 
     // If project exists, extract image urls and preload images
     if ($scope.project) {
-        var images = [];
-        var imageURLs = [];
 
-        for (var p = 0; $scope.project.content.images.length >p; p++) {
-            images.push($scope.project.content.images[p]);
-            imageURLs.push($scope.project.content.images[p].url);
-        };
+        Preloader.preload($scope.project.content.images);
 
-        // Preloader.preload(imageURLs);
+        var sections = $scope.project.content.image_sections;
 
         // Construct Image Object
         ///////////////////////////////////////////////////////
-        images.shift(); // Remove Featured Image from object
         $scope.imageSections = [];
-        for (var o = 0; images.length > o; o++) {
-            console.dir(images[o]);
+        for (var o = 0; sections.length > o; o++) {
+
             var temp = {
-                'label' : images[o].label,
-                'order' : images[o].order,
+                'label' : sections[o].label,
+                'order' : sections[o].order,
                 'images' : [{
-                    'url' : images[o].url,
-                    'alt' : images[o].alt
+                    'url' : sections[o].url,
+                    'alt' : sections[o].alt
                 }]
             };
 
             // If this Image and Next Image are part of a pair
             // Then Advance loop $index ahead by one and pair img urls together
-            if (images[o].half && images[o+1].half) {
+            if (sections[o].half && sections[o+1].half) {
                 o++;
                 temp.images.push({
-                    'url' : images[o].url,
-                    'alt' : images[o].alt
+                    'url' : sections[o].url,
+                    'alt' : sections[o].alt
                 });
             }
 
             $scope.imageSections.push(temp);
         };
 
-        console.log($scope.imageSections);
 
         ///////////////////////////////////////////////////////
     // Else redirect back to projects overview page

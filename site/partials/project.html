@@ -15,7 +15,7 @@
 
 <div id="projectLayout">
 	<div class="featuredImage">
-		<img ng-src="{{project.content.featured_image}}">
+		<img ng-src="{{project.content.featured_image.url}}" alt="{{project.content.featured_image.alt}}">
 	</div>
 	<div class="projectContent">
 		<h1 ng-bind-html="project.title"></h1>
@@ -35,7 +35,7 @@
 				</section>
 				<section ng-repeat="detail in project.content.other_details">
 					<h2>{{detail.title}}</h2>
-					<p>{{detail.detail}}</p>
+					<p>{{detail.details}}</p>
 				</section>
 			</div>
 			<a class="clientSite" href="{{project.content.url}}">Visit Website</a>
@@ -88,7 +88,7 @@
 	<h3>Related Projects</h3>
 	<section ng-repeat="related in project.content.related_projects" ng-click="viewProject(related.id)">
 		<div class="imgWrapper">
-			<img ng-src="{{related.image}}">
+			<img ng-src="{{related.image.url}}" alt="{{related.image.alt}}">
 		</div>
 		<div class="contentWrapper">
 			<p>{{related.title}}</p>
