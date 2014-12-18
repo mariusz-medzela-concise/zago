@@ -370,7 +370,6 @@ app.factory('SiteLoader', function($http, $q){
                         if (post.terms.category[0].slug == 'team-member') {
                             temp.content = {
                                 'position' : ternValue(post.acf.position),
-                                'linkedin_url' : ternValue(post.acf.linkedin_url),
                                 'featured_image' : (post.acf.profile_picture && post.acf.profile_picture.url) ? post.acf.profile_picture.url : null,
                                 'funny_picture' : (post.acf.funny_picture && post.acf.funny_picture.url) ? post.acf.funny_picture.url : null,
                                 'accounts' : ternValue(post.acf.accounts)
@@ -1139,19 +1138,13 @@ app.directive('grid', function($compile) {
 
                     h3Text =  data.content.position;
 
-                    if (data.content.linkedin_url) {
-                        var anchorWrap = document.createElement('div');
-                        anchorWrap.setAttribute('class', 'anchorWrapper li_btn');
-                        var anchor = document.createElement('a');
-                        anchor.setAttribute('href', data.content.linkedin_url);
-                        anchor.setAttribute('target', '_blank');
-                        anchorWrap.appendChild(anchor);
-                        imgWrap.appendChild(anchorWrap);
-                    }
-
                     if (data.content.accounts && data.content.accounts.length) {
+
+                        var account, anchor;
+                        var socialList = document.createElement('ul');
+                        socialList.setAttribute('class', 'socialButtons');
+
                         for (var d = 0; data.content.accounts.length > d; d++) {
-                            var newLink = document.createElement('div');
 
                             var linkClass;
                             switch(data.content.accounts[d].account.toLowerCase()) {
@@ -1176,19 +1169,24 @@ app.directive('grid', function($compile) {
                                 case 'youtube':
                                     linkClass = 'yt_btn';
                                     break;
+                                case 'mail':
+                                    linkClass = 'ma_btn';
+                                    break;
                                 default:
-                                    linkClass = 'other_btn';
+                                    linkClass = 'ot_btn';
                             }
 
+                            account = document.createElement('li');
+                            account.setAttribute('class', 'anchorWrapper invert ' + linkClass);
 
-                            newLink.setAttribute('class', 'anchorWrapper ' + linkClass);
-
-                            var anch = document.createElement('a');
-                            anch.setAttribute('href', data.content.accounts[d].url);
-                            anch.setAttribute('target', '_blank');
-                            newLink.appendChild(anch);
-                            imgWrap.appendChild(newLink);
+                            anchor = document.createElement('a');
+                            anchor.setAttribute('href', data.content.accounts[d].url);
+                            anchor.setAttribute('target', '_blank');
+                            account.appendChild(anchor);
+                            socialList.appendChild(account);
                         }
+
+                        imgWrap.appendChild(socialList);
                     }
                 }
 

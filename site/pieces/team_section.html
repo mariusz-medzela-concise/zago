@@ -3,9 +3,24 @@
         <img ng-src="{{section.profile_image}}">
         <img ng-src="{{section.funny_image}}">
 
-        <div class="anchorWrapper li_btn">
-            <a href="{{section.linkedin}}" target="_blank"></a>
-        </div>
+        <ul class="socialButtons">
+			<li class="anchorWrapper invert"
+				ng-repeat="social in section.content.social_media"
+				ng-class="{
+					fb_btn: social.account.toLowerCase() == 'facebook',
+					tw_btn: social.account.toLowerCase() == 'twitter',
+					be_btn: social.account.toLowerCase() == 'behance',
+					pi_btn: social.account.toLowerCase() == 'pinterest',
+					li_btn: social.account.toLowerCase() == 'linkedin',
+					tr_btn: social.account.toLowerCase() == 'tumblr',
+					yt_btn: social.account.toLowerCase() == 'youtube',
+					ot_btn: social.account.toLowerCase() == 'other',
+					ma_btn: social.account.toLowerCase() == 'mail'
+				}"
+			>
+				<a href="{{section.account.url}}"></a>
+			</li>
+		</ul>
     </div>
 
     <h2>{{section.name}}</h2>

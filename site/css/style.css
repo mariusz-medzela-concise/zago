@@ -193,11 +193,11 @@ ul.socialButtons li {
   background-repeat: no-repeat;
   background-size: 50% auto;
   border-right: 1px solid #040707;
-  -webkit-transition: background 0.5s ease-out;
-  -moz-transition: background 0.5s ease-out;
-  -ms-transition: background 0.5s ease-out;
-  -o-transition: background 0.5s ease-out;
-  transition: background 0.5s ease-out;
+  -webkit-transition: background-color 0.5s ease-out;
+  -moz-transition: background-color 0.5s ease-out;
+  -ms-transition: background-color 0.5s ease-out;
+  -o-transition: background-color 0.5s ease-out;
+  transition: background-color 0.5s ease-out;
 }
 ul.socialButtons li:last-of-type {
   border-right: 0;
@@ -210,26 +210,92 @@ ul.socialButtons li a {
 ul.socialButtons li:hover {
   background-color: #e6e6e6;
 }
+ul.socialButtons li.invert {
+  background-color: transparent;
+}
+ul.socialButtons li.invert:hover {
+  background-color: white;
+}
 ul.socialButtons li.fb_btn {
-  background-position: 65% -2%;
+  background-position: 72% -1.5%;
+}
+ul.socialButtons li.fb_btn.invert {
+  background-position: 72% 5%;
+}
+ul.socialButtons li.fb_btn.invert:hover {
+  background-position: 72% -1.5%;
 }
 ul.socialButtons li.tw_btn {
-  background-position: 45% 5.9%;
+  background-position: 50% 11.25%;
 }
-ul.socialButtons li.be_btn {
-  background-position: 49% 30.25%;
+ul.socialButtons li.tw_btn.invert {
+  background-position: 50% 17.25%;
 }
-ul.socialButtons li.pi_btn {
-  background-position: 57% 22.5%;
+ul.socialButtons li.tw_btn.invert:hover {
+  background-position: 50% 11.25%;
 }
 ul.socialButtons li.li_btn {
-  background-position: 48% 14.25%;
+  background-position: 50% 23.5%;
+}
+ul.socialButtons li.li_btn.invert {
+  background-position: 50% 29.75%;
+}
+ul.socialButtons li.li_btn.invert:hover {
+  background-position: 50% 23.5%;
+}
+ul.socialButtons li.pi_btn {
+  background-position: 60% 36%;
+}
+ul.socialButtons li.pi_btn.invert {
+  background-position: 60% 36%;
+}
+ul.socialButtons li.pi_btn.invert:hover {
+  background-position: 60% 36%;
+}
+ul.socialButtons li.be_btn {
+  background-position: 50% 48.25%;
+}
+ul.socialButtons li.be_btn.invert {
+  background-position: 50% 48.25%;
+}
+ul.socialButtons li.be_btn.invert:hover {
+  background-position: 50% 48.25%;
 }
 ul.socialButtons li.ma_btn {
-  background-position: 49% 37.75%;
+  background-position: 50% 59.5%;
+}
+ul.socialButtons li.ma_btn.invert {
+  background-position: 50% 59.5%;
+}
+ul.socialButtons li.ma_btn.invert:hover {
+  background-position: 50% 59.5%;
 }
 ul.socialButtons li.tr_btn {
-  background-position: 55% 45.75%;
+  background-position: 60% 71.25%;
+}
+ul.socialButtons li.tr_btn.invert {
+  background-position: 60% 71.25%;
+}
+ul.socialButtons li.tr_btn.invert:hover {
+  background-position: 60% 71.25%;
+}
+ul.socialButtons li.yt_btn {
+  background-position: 50% 83.75%;
+}
+ul.socialButtons li.yt_btn.invert {
+  background-position: 50% 83.75%;
+}
+ul.socialButtons li.yt_btn.invert:hover {
+  background-position: 50% 83.75%;
+}
+ul.socialButtons li.ot_btn {
+  background-position: 50% 95.25%;
+}
+ul.socialButtons li.ot_btn.invert {
+  background-position: 50% 95.25%;
+}
+ul.socialButtons li.ot_btn.invert:hover {
+  background-position: 50% 95.25%;
 }
 
 button {
@@ -1896,52 +1962,53 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
 .gridWrapper.teamWrapper .grid section .imgWrapper img:first-of-type {
   z-index: 150;
 }
-.gridWrapper.teamWrapper .grid section .imgWrapper .anchorWrapper {
+.gridWrapper.teamWrapper .grid section .imgWrapper ul.socialButtons {
+  border: 0;
+}
+.gridWrapper.teamWrapper .grid section .imgWrapper ul.socialButtons li.anchorWrapper {
   width: 30px;
   height: 30px;
-  position: absolute;
-  top: 0;
-  right: 0;
   z-index: 200;
   border: 1px solid white;
   border-top: 0;
   border-right: 0;
+  -webkit-transition: none 0.5s ease-out;
+  -moz-transition: none 0.5s ease-out;
+  -ms-transition: none 0.5s ease-out;
+  -o-transition: none 0.5s ease-out;
+  transition: none 0.5s ease-out;
+  position: absolute;
+  top: 0;
 }
-.gridWrapper.teamWrapper .grid section .imgWrapper .anchorWrapper a {
+.gridWrapper.teamWrapper .grid section .imgWrapper ul.socialButtons li.anchorWrapper:nth-of-type(1) {
+  right: 0;
+}
+.gridWrapper.teamWrapper .grid section .imgWrapper ul.socialButtons li.anchorWrapper:nth-of-type(2) {
+  right: 30px;
+}
+.gridWrapper.teamWrapper .grid section .imgWrapper ul.socialButtons li.anchorWrapper:nth-of-type(3) {
+  right: 60px;
+}
+.gridWrapper.teamWrapper .grid section .imgWrapper ul.socialButtons li.anchorWrapper a {
   display: block;
   width: 100%;
   height: 100%;
-  position: relative;
 }
-.gridWrapper.teamWrapper .grid section .imgWrapper .anchorWrapper a::after {
-  content: '';
-  width: 100%;
-  height: 100%;
-  background-image: url("../images/social_sprites.png");
-  background-position: 48% 70.5%;
-  background-repeat: no-repeat;
-  background-size: 50% auto;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  -webkit-transform: translate(-50%, -50%);
-  -moz-transform: translate(-50%, -50%);
-  -ms-transform: translate(-50%, -50%);
-  -o-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
-}
-.gridWrapper.teamWrapper .grid section .imgWrapper .anchorWrapper:hover {
+.gridWrapper.teamWrapper .grid section .imgWrapper ul.socialButtons li.anchorWrapper:hover {
   background-color: white;
 }
-.gridWrapper.teamWrapper .grid section .imgWrapper .anchorWrapper:hover a::after {
-  background-position: 48% 14.25%;
-}
 @media (min-width: 992px) {
-  .gridWrapper.teamWrapper .grid section .imgWrapper .anchorWrapper {
+  .gridWrapper.teamWrapper .grid section .imgWrapper ul.socialButtons li.anchorWrapper {
     width: 2.25em;
     height: 2.25em;
     width: 2.25vw;
     height: 2.25vw;
+  }
+  .gridWrapper.teamWrapper .grid section .imgWrapper ul.socialButtons li.anchorWrapper:nth-of-type(2) {
+    right: 2.25vw;
+  }
+  .gridWrapper.teamWrapper .grid section .imgWrapper ul.socialButtons li.anchorWrapper:nth-of-type(3) {
+    right: 4.5vw;
   }
 }
 @media (min-width: 640px) {

@@ -27,7 +27,17 @@ angular.module('app').run(['$templateCache', function($templateCache) {
 
 
   $templateCache.put('pieces/team_section.html',
-    "<section data-id={{section.id}}><div class=imgWrapper><img ng-src={{section.profile_image}}> <img ng-src={{section.funny_image}}><div class=\"anchorWrapper li_btn\"><a href={{section.linkedin}} target=_blank></a></div></div><h2>{{section.name}}</h2><h3>{{section.position}}</h3></section>"
+    "<section data-id={{section.id}}><div class=imgWrapper><img ng-src={{section.profile_image}}> <img ng-src={{section.funny_image}}><ul class=socialButtons><li class=\"anchorWrapper invert\" ng-repeat=\"social in section.content.social_media\" ng-class=\"{\n" +
+    "\t\t\t\t\tfb_btn: social.account.toLowerCase() == 'facebook',\n" +
+    "\t\t\t\t\ttw_btn: social.account.toLowerCase() == 'twitter',\n" +
+    "\t\t\t\t\tbe_btn: social.account.toLowerCase() == 'behance',\n" +
+    "\t\t\t\t\tpi_btn: social.account.toLowerCase() == 'pinterest',\n" +
+    "\t\t\t\t\tli_btn: social.account.toLowerCase() == 'linkedin',\n" +
+    "\t\t\t\t\ttr_btn: social.account.toLowerCase() == 'tumblr',\n" +
+    "\t\t\t\t\tyt_btn: social.account.toLowerCase() == 'youtube',\n" +
+    "\t\t\t\t\tot_btn: social.account.toLowerCase() == 'other',\n" +
+    "\t\t\t\t\tma_btn: social.account.toLowerCase() == 'mail'\n" +
+    "\t\t\t\t}\"><a href={{section.account.url}}></a></li></ul></div><h2>{{section.name}}</h2><h3>{{section.position}}</h3></section>"
   );
 
 
@@ -64,6 +74,8 @@ angular.module('app').run(['$templateCache', function($templateCache) {
     "\t\t\t\t\t\t\tpi_btn: social.account.toLowerCase() == 'pinterest',\n" +
     "\t\t\t\t\t\t\tli_btn: social.account.toLowerCase() == 'linkedin',\n" +
     "\t\t\t\t\t\t\ttr_btn: social.account.toLowerCase() == 'tumblr',\n" +
+    "\t\t\t\t\t\t\tyt_btn: social.account.toLowerCase() == 'youtube',\n" +
+    "\t\t\t\t\t\t\tot_btn: social.account.toLowerCase() == 'other',\n" +
     "\t\t\t\t\t\t\tma_btn: social.account.toLowerCase() == 'mail'\n" +
     "\t\t\t\t\t\t}\"><a href={{social.url}}></a></li></ul></div></div><div class=projectBody ng-bind-html=project.body></div></div></div><div id=projectImages ng-if=imageSections.length><section ng-repeat=\"section in imageSections\"><h6>{{section.label}}</h6><div class=imageWrapper><div ng-repeat=\"image in section.images\" class=imageBox ng-class=\"{halfImage: section.images.length > 1}\"><img ng-src={{image.url}} alt={{image.alt}}></div></div></section></div><div id=readAbout ng-if=project.content.read_about.length><h3>Read More About {{project.content.client}}</h3><section ng-repeat=\"story in project.content.read_about\"><a href={{story.url}} target=_blank><p>{{story.title}}</p><h4>{{story.source}}</h4></a></section></div><div id=relatedProjects ng-if=project.content.related_projects.length><h3>Related Projects</h3><section ng-repeat=\"related in project.content.related_projects\" ng-click=viewProject(related.id)><div class=imgWrapper><img ng-src={{related.image}}></div><div class=contentWrapper><p>{{related.title}}</p><h4>{{related.client}}</h4></div></section></div>"
   );
