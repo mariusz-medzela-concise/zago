@@ -185,6 +185,7 @@ ul.socialButtons {
   border: 1px solid #040707;
 }
 ul.socialButtons li {
+  cursor: pointer;
   float: left;
   width: 30px;
   height: 30px;
@@ -213,7 +214,7 @@ ul.socialButtons li:hover {
 ul.socialButtons li.invert {
   background-color: transparent;
 }
-ul.socialButtons li.invert:hover {
+ul.socialButtons li.invert.invertHover:hover {
   background-color: white;
 }
 ul.socialButtons li.fb_btn {
@@ -222,7 +223,7 @@ ul.socialButtons li.fb_btn {
 ul.socialButtons li.fb_btn.invert {
   background-position: 72% 5%;
 }
-ul.socialButtons li.fb_btn.invert:hover {
+ul.socialButtons li.fb_btn.invert.invertHover:hover {
   background-position: 72% -1.5%;
 }
 ul.socialButtons li.tw_btn {
@@ -231,7 +232,7 @@ ul.socialButtons li.tw_btn {
 ul.socialButtons li.tw_btn.invert {
   background-position: 50% 17.25%;
 }
-ul.socialButtons li.tw_btn.invert:hover {
+ul.socialButtons li.tw_btn.invert.invertHover:hover {
   background-position: 50% 11.25%;
 }
 ul.socialButtons li.li_btn {
@@ -240,7 +241,7 @@ ul.socialButtons li.li_btn {
 ul.socialButtons li.li_btn.invert {
   background-position: 50% 29.75%;
 }
-ul.socialButtons li.li_btn.invert:hover {
+ul.socialButtons li.li_btn.invert.invertHover:hover {
   background-position: 50% 23.5%;
 }
 ul.socialButtons li.pi_btn {
@@ -249,7 +250,7 @@ ul.socialButtons li.pi_btn {
 ul.socialButtons li.pi_btn.invert {
   background-position: 60% 36%;
 }
-ul.socialButtons li.pi_btn.invert:hover {
+ul.socialButtons li.pi_btn.invert.invertHover:hover {
   background-position: 60% 36%;
 }
 ul.socialButtons li.be_btn {
@@ -258,7 +259,7 @@ ul.socialButtons li.be_btn {
 ul.socialButtons li.be_btn.invert {
   background-position: 50% 48.25%;
 }
-ul.socialButtons li.be_btn.invert:hover {
+ul.socialButtons li.be_btn.invert.invertHover:hover {
   background-position: 50% 48.25%;
 }
 ul.socialButtons li.ma_btn {
@@ -267,7 +268,7 @@ ul.socialButtons li.ma_btn {
 ul.socialButtons li.ma_btn.invert {
   background-position: 50% 59.5%;
 }
-ul.socialButtons li.ma_btn.invert:hover {
+ul.socialButtons li.ma_btn.invert.invertHover:hover {
   background-position: 50% 59.5%;
 }
 ul.socialButtons li.tr_btn {
@@ -276,7 +277,7 @@ ul.socialButtons li.tr_btn {
 ul.socialButtons li.tr_btn.invert {
   background-position: 60% 71.25%;
 }
-ul.socialButtons li.tr_btn.invert:hover {
+ul.socialButtons li.tr_btn.invert.invertHover:hover {
   background-position: 60% 71.25%;
 }
 ul.socialButtons li.yt_btn {
@@ -285,7 +286,7 @@ ul.socialButtons li.yt_btn {
 ul.socialButtons li.yt_btn.invert {
   background-position: 50% 83.75%;
 }
-ul.socialButtons li.yt_btn.invert:hover {
+ul.socialButtons li.yt_btn.invert.invertHover:hover {
   background-position: 50% 83.75%;
 }
 ul.socialButtons li.ot_btn {
@@ -294,7 +295,7 @@ ul.socialButtons li.ot_btn {
 ul.socialButtons li.ot_btn.invert {
   background-position: 50% 95.25%;
 }
-ul.socialButtons li.ot_btn.invert:hover {
+ul.socialButtons li.ot_btn.invert.invertHover:hover {
   background-position: 50% 95.25%;
 }
 
@@ -1994,9 +1995,6 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
   width: 100%;
   height: 100%;
 }
-.gridWrapper.teamWrapper .grid section .imgWrapper ul.socialButtons li.anchorWrapper:hover {
-  background-color: white;
-}
 @media (min-width: 992px) {
   .gridWrapper.teamWrapper .grid section .imgWrapper ul.socialButtons li.anchorWrapper {
     width: 2.25em;
@@ -2005,9 +2003,11 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
     height: 2.25vw;
   }
   .gridWrapper.teamWrapper .grid section .imgWrapper ul.socialButtons li.anchorWrapper:nth-of-type(2) {
+    right: 2.25em;
     right: 2.25vw;
   }
   .gridWrapper.teamWrapper .grid section .imgWrapper ul.socialButtons li.anchorWrapper:nth-of-type(3) {
+    right: 4.55em;
     right: 4.5vw;
   }
 }
@@ -2104,12 +2104,14 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
 #projectLayout .featuredImage {
   position: relative;
   width: 100%;
+  height: 100em;
   height: 100vh;
   min-height: 400px;
   overflow: hidden;
 }
 @media (min-width: 992px) {
   #projectLayout .featuredImage {
+    height: 50em;
     height: 50vh;
   }
 }
@@ -2276,6 +2278,7 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
 }
 #projectImages section .imageWrapper .imageBox {
   width: 100%;
+  height: 50em;
   height: 50vh;
   height: 50vmin;
   min-height: 400px;
@@ -2359,6 +2362,7 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
 }
 
 #readAbout section {
+  height: 14em;
   height: 14vw;
   background-color: #e6e6e6;
 }
@@ -2381,6 +2385,7 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
 }
 #relatedProjects section .imgWrapper {
   width: 50%;
+  height: 14em;
   height: 14vw;
   position: relative;
   overflow: hidden;

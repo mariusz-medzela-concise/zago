@@ -25,7 +25,7 @@
 <body id="body" ng-controller="AppCtrl">
     <!-- @BUG {pageLoading:isLoading || isRouting} controls the page view sliding offscreen to the right -->
     <!-- It works, but its very buggy. Basically CSS animates the page in/out based on Angular value -->
-    <div id="container" ng-class="{pageLoading:isLoading || isRouting}">
+    <div id="container" ng-class="{pageLoading:isLoading}">
 
         <img id="siteID" class="siteID" alt="Zago LLC Logo" src="images/zago_logo.png" ng-click="route('home', true)">
 
@@ -36,7 +36,7 @@
                         <li> <a ng-click="route('home')" title="Home">Zago</a> </li>
                         <li> <a ng-click="route('projects')" title="Zago Projects">Projects</a> </li>
                         <li> <a ng-click="route('team')" title="Meet Z Team">Team</a> </li>
-                        <li> <a ng-click="route('love')" title="Blog Love">Love</a> </li>
+                        <li> <a href="http://zagolovesyou.tumblr.com/" ng-click="toggleMenu(true)" target="_blank" title="Blog Love">Love</a> </li>
                     </ul>
                 </div>
                 <div class="menuContacts" office-list></div>
@@ -52,7 +52,7 @@
 
         <div id="pageContent" class="{{pageView}}" ng-class="{pageLoading: isLoading}" ui-view autoscroll="true"><!-- Angular Partials go here --></div>
 
-        <footer id="footer" ng-class="{pageLoading: isLoading}">
+        <footer id="footer" ng-class="{pageLoading: isLoading, homePage: pageView == 'homePage', lovePage: pageView == 'lovePage'}">
             <div office-list></div>
             <section class="intern">
                 <p>We take interns in NYC for

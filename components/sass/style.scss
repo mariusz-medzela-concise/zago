@@ -108,6 +108,7 @@ ul {
 	&.socialButtons {
 		border: 1px solid $darkgrey;
 		li {
+			cursor: pointer;
 			float: left;
 			width: 30px;
 			height: 30px;
@@ -127,61 +128,61 @@ ul {
 				background-color: $grey; }
 			&.invert {
 				background-color: transparent;
-				&:hover {
+				&.invertHover:hover {
 					background-color: white; } }
 			&.fb_btn {
 				background-position: 72% -1.5%;
 				&.invert {
 					background-position: 72% 5%;
-					&:hover {
+					&.invertHover:hover {
 						background-position: 72% -1.5%;; } } }
 			&.tw_btn {
 				background-position: 50% 11.25%;
 				&.invert {
 					background-position: 50% 17.25%;
-					&:hover {
+					&.invertHover:hover {
 						background-position: 50% 11.25%; } } }
 			&.li_btn {
 				background-position: 50% 23.5%;
 				&.invert {
 					background-position: 50% 29.75%;
-					&:hover {
+					&.invertHover:hover {
 						background-position: 50% 23.5%; } } }
 			&.pi_btn {
 				background-position: 60% 36%;
 				&.invert {
 					background-position: 60% 36%;
-					&:hover {
+					&.invertHover:hover {
 						background-position: 60% 36%; } } }
 			&.be_btn {
 				background-position: 50% 48.25%;
 				&.invert {
 					background-position: 50% 48.25%;
-					&:hover {
+					&.invertHover:hover {
 						background-position: 50% 48.25%; } } }
 			&.ma_btn {
 				background-position: 50% 59.5%;
 				&.invert {
 					background-position: 50% 59.5%;
-					&:hover {
+					&.invertHover:hover {
 						background-position: 50% 59.5%; } } }
 			&.tr_btn {
 				background-position: 60% 71.25%;
 				&.invert {
 					background-position: 60% 71.25%;
-					&:hover {
+					&.invertHover:hover {
 						background-position: 60% 71.25%; } } }
 			&.yt_btn {
 				background-position: 50% 83.75%;
 				&.invert {
 					background-position: 50% 83.75%;
-					&:hover {
+					&.invertHover:hover {
 						background-position: 50% 83.75%; } } }
 			&.ot_btn {
 				background-position: 50% 95.25%;
 				&.invert {
 					background-position: 50% 95.25%;
-					&:hover {
+					&.invertHover:hover {
 						background-position: 50% 95.25%; } } }
 		}
 	}
@@ -1274,13 +1275,11 @@ nav {
 								display: block;
 								width: 100%;
 								height: 100%; }
-							&:hover {
-								background-color: white; }
 							@include breakpoint(desktop) {
 								width: 2.25em; height: 2.25em;
 								width: 2.25vw; height: 2.25vw;
-								&:nth-of-type(2) { right: 2.25vw; }
-								&:nth-of-type(3) { right: 4.5vw; } } }
+								&:nth-of-type(2) { right: 2.25em; right: 2.25vw; }
+								&:nth-of-type(3) { right: 4.55em; right: 4.5vw; } } }
 		} } } }
 		@include breakpoint(smallTablet) {
 			.grid {
@@ -1355,10 +1354,12 @@ nav {
 	.featuredImage {
 		position: relative;
 		width: 100%;
+		height: 100em;
 		height: 100vh;
 		min-height: 400px;
 		overflow: hidden;
 		@include breakpoint(desktop) {
+			height: 50em;
 			height: 50vh; }
 		img {
 			@extend .absoluteCenter;
@@ -1462,6 +1463,7 @@ nav {
 				margin-left: 100px; }
 			.imageBox {
 				width: 100%;
+				height: 50em;
 				height: 50vh;
 				height: 50vmin;
 				min-height: 400px;
@@ -1527,6 +1529,7 @@ nav {
 #readAbout {
 	@extend .flexBox4;
 	section {
+		height: 14em;
 		height: 14vw;
 		background-color: $grey;
 		a {
@@ -1545,6 +1548,7 @@ nav {
 			vertical-align: top; }
 		.imgWrapper {
 			width: 50%;
+			height: 14em;
 			height: 14vw;
 			position: relative;
 			overflow: hidden;
