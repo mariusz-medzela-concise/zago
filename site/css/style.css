@@ -374,21 +374,14 @@ footer section.social p {
   }
   footer section.social ul {
     float: none;
-    width: 96px;
-    border: 0;
-    border-left: 1px solid #040707;
+    width: 93px;
+    border-right: 0;
+    border-bottom: 0;
   }
   footer section.social ul li {
-    border-top: 1px solid #040707;
-  }
-  footer section.social ul li:nth-of-type(4) {
     border-bottom: 1px solid #040707;
   }
-  footer section.social ul li:nth-of-type(5) {
-    border-bottom: 1px solid #040707;
-  }
-  footer section.social ul li:nth-of-type(6) {
-    border-bottom: 1px solid #040707;
+  footer section.social ul li:nth-of-type(3), footer section.social ul li:last-of-type {
     border-right: 1px solid #040707;
   }
   footer section.social p {
@@ -1101,7 +1094,9 @@ nav#projectNav ul li .navTitle {
   position: absolute;
   top: -1px;
   left: 100%;
+  margin-left: 1px;
   border: 1px solid #040707;
+  background-color: white;
   border-left: 0px;
   padding: 10px;
   height: 30px;
@@ -1455,6 +1450,7 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
 #heroBanner h1 {
   font-family: 'Black';
   font-size: 4em;
+  line-height: 1.5em;
   color: white;
   letter-spacing: .075em;
   text-transform: uppercase;
@@ -2057,6 +2053,7 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
 #projectLayout .projectContent {
   font-size: 1.6em;
   line-height: 1.5em;
+  margin-bottom: 50px;
   overflow: hidden;
   *zoom: 1;
 }
@@ -2071,6 +2068,9 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
 #projectLayout .projectContent .projectDetails {
   float: left;
 }
+#projectLayout .projectContent .projectDetails .projectInfo section {
+  margin-bottom: 25px;
+}
 #projectLayout .projectContent .projectDetails .projectInfo section h2 {
   letter-spacing: .075em;
   text-transform: uppercase;
@@ -2080,10 +2080,26 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
   letter-spacing: .02em;
 }
 #projectLayout .projectContent .projectDetails a.clientSite {
+  display: block;
   color: black;
+  text-decoration: underline;
+  margin-bottom: 20px;
 }
 #projectLayout .projectContent .projectDetails .socialAccounts ul.socialButtons {
-  display: inline-block;
+  overflow: hidden;
+  *zoom: 1;
+  display: block;
+  width: 108px;
+  border-right: 0;
+  border-bottom: 0;
+}
+#projectLayout .projectContent .projectDetails .socialAccounts ul.socialButtons li {
+  width: 35px;
+  height: 35px;
+  border-bottom: 1px solid #040707;
+}
+#projectLayout .projectContent .projectDetails .socialAccounts ul.socialButtons li:nth-of-type(3), #projectLayout .projectContent .projectDetails .socialAccounts ul.socialButtons li:last-of-type {
+  border-right: 1px solid #040707;
 }
 #projectLayout .projectContent .projectBody {
   padding: 0 30px;
@@ -2122,9 +2138,26 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
 @media (min-width: 992px) {
   #projectLayout .projectContent .projectBody {
     padding: 0 140px;
+  }
+}
+@media (min-width: 1200px) {
+  #projectLayout .projectContent .projectBody {
     -webkit-column-count: 2;
     -moz-column-count: 2;
     column-count: 2;
+    -webkit-column-gap: 30px;
+    -moz-column-gap: 30px;
+    column-gap: 30px;
+    -webkit-column-rule: 0;
+    -moz-column-rule: 0;
+    column-rule: 0;
+  }
+}
+@media (min-width: 1800px) {
+  #projectLayout .projectContent .projectBody {
+    -webkit-column-count: 3;
+    -moz-column-count: 3;
+    column-count: 3;
     -webkit-column-gap: 30px;
     -moz-column-gap: 30px;
     column-gap: 30px;
@@ -2137,7 +2170,8 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
 #projectImages {
   margin-bottom: 50px;
 }
-#projectImages section h3 {
+#projectImages section h6 {
+  display: none;
   float: left;
   font-size: 1.6em;
   line-height: 0;
@@ -2152,7 +2186,8 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
   transform-origin: 0 0;
 }
 @media (min-width: 640px) {
-  #projectImages section h3 {
+  #projectImages section h6 {
+    display: block;
     -webkit-transform: rotate(270deg) translate(-150%, 80px);
     -webkit-transform-origin: 0 0;
     -moz-transform: rotate(270deg) translate(-150%, 80px);
@@ -2164,7 +2199,7 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
   }
 }
 #projectImages section .imageWrapper {
-  margin-left: 50px;
+  margin-left: 15px;
   line-height: 0;
 }
 @media (min-width: 640px) {
@@ -2200,17 +2235,60 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
   overflow: hidden;
   *zoom: 1;
 }
-@media (min-width: 768px) {
+@media (min-width: 640px) {
   .flexBox4, #readAbout, #relatedProjects {
     margin-left: 100px;
   }
 }
+.flexBox4 h3, #readAbout h3, #relatedProjects h3 {
+  font-size: 2em;
+  letter-spacing: .075em;
+  font-family: 'Black';
+  margin-bottom: 40px;
+}
 .flexBox4 section, #readAbout section, #relatedProjects section {
-  display: inline-block;
-  float: right;
-  width: 23.5%;
-  margin-left: 2%;
+  cursor: pointer;
+  display: block;
+  margin-right: 0;
   color: black;
+}
+.flexBox4 section:nth-of-type(4), #readAbout section:nth-of-type(4), #relatedProjects section:nth-of-type(4) {
+  display: none;
+}
+.flexBox4 section p, #readAbout section p, #relatedProjects section p {
+  font-size: 2.4em;
+  text-transform: capitalize;
+}
+.flexBox4 section h4, #readAbout section h4, #relatedProjects section h4 {
+  font-size: 1.6em;
+  letter-spacing: .075em;
+  text-transform: uppercase;
+  font-family: 'Black';
+  margin-top: 10px;
+}
+@media (min-width: 640px) {
+  .flexBox4 section, #readAbout section, #relatedProjects section {
+    float: left;
+    display: inline-block;
+    width: 32%;
+    margin-right: 2%;
+  }
+  .flexBox4 section:nth-of-type(3), #readAbout section:nth-of-type(3), #relatedProjects section:nth-of-type(3) {
+    margin-right: 0;
+  }
+}
+@media (min-width: 992px) {
+  .flexBox4 section, #readAbout section, #relatedProjects section {
+    width: 23.5%;
+    margin-right: 2%;
+  }
+  .flexBox4 section:nth-of-type(3), #readAbout section:nth-of-type(3), #relatedProjects section:nth-of-type(3) {
+    margin-right: 2%;
+  }
+  .flexBox4 section:nth-of-type(4), #readAbout section:nth-of-type(4), #relatedProjects section:nth-of-type(4) {
+    margin-right: 0;
+    display: inline-block;
+  }
 }
 
 #readAbout section {
@@ -2220,20 +2298,46 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
 #readAbout section a {
   color: black;
   display: inline-block;
-  padding: 60px;
-}
-#readAbout section:last-of-type {
-  margin-left: 0;
+  padding: 30px;
 }
 
+#relatedProjects {
+  margin-right: 15px;
+}
+#relatedProjects section {
+  overflow: hidden;
+  *zoom: 1;
+}
+#relatedProjects section .imgWrapper, #relatedProjects section .contentWrapper {
+  float: left;
+  vertical-align: top;
+}
 #relatedProjects section .imgWrapper {
+  width: 50%;
   height: 14vw;
   position: relative;
   overflow: hidden;
 }
 #relatedProjects section .imgWrapper img {
+  width: 100%;
   min-height: 100%;
   min-width: 100%;
+}
+#relatedProjects section .contentWrapper {
+  margin-left: 15px;
+}
+#relatedProjects section .contentWrapper p {
+  margin-top: 20px;
+}
+@media (min-width: 640px) {
+  #relatedProjects {
+    margin-right: 0;
+  }
+  #relatedProjects section .imgWrapper, #relatedProjects section .contentWrapper {
+    margin-left: 0;
+    float: none;
+    width: auto;
+  }
 }
 
 /*************************************************/

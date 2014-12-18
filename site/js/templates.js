@@ -12,12 +12,22 @@ angular.module('app').run(['$templateCache', function($templateCache) {
 
 
   $templateCache.put('pieces/office_list.html',
-    "<section ng-repeat=\"office in offices\"><h2 ng-bind-html=office.location></h2><p ng-bind-html=office.address></p><p ng-bind-html=office.region></p><p><a href=tel:{{office.phone}} ng-bind-html=\"'P: '+office.phone\"></a></p></section><section class=info><p>Say ciao. Email us at</p><a href=mailto:info@zagollc.com>info@zagollc.com</a></section>"
+    "<section ng-repeat=\"office in offices\"><h2 ng-bind-html=office.location></h2><p ng-bind-html=office.address></p><p ng-bind-html=office.region></p><p><a href=tel:{{office.phone}} ng-bind-html=\"'P: '+office.phone\"></a></p></section><section class=info><p>Say ciao. Email us at&nbsp;</p><a href=mailto:info@zagollc.com>info@zagollc.com</a></section>"
+  );
+
+
+  $templateCache.put('pieces/project_section.html',
+    "<section data-id={{section.id}}><div class=imgWrapper><img ng-src={{section.img}}><div class=overlay></div></div><h2>{{section.title}}</h2><h3>{{section.client}}</h3></section>"
   );
 
 
   $templateCache.put('pieces/social_buttons.html',
     "<ul class=socialButtons><li ng-class=social.class ng-repeat=\"social in socials | orderBy: 'order'\"><a href={{social.url}} title=\"zago {{social.name}} account\" target=_blank></a></li></ul><p>&copy;2014 Zago, LLC.</p>"
+  );
+
+
+  $templateCache.put('pieces/team_section.html',
+    "<section data-id={{section.id}}><div class=imgWrapper><img ng-src={{section.profile_image}}> <img ng-src={{section.funny_image}}><div class=\"anchorWrapper li_btn\"><a href={{section.linkedin}} target=_blank></a></div></div><h2>{{section.name}}</h2><h3>{{section.position}}</h3></section>"
   );
 
 
@@ -55,17 +65,17 @@ angular.module('app').run(['$templateCache', function($templateCache) {
     "\t\t\t\t\t\t\tli_btn: social.account.toLowerCase() == 'linkedin',\n" +
     "\t\t\t\t\t\t\ttr_btn: social.account.toLowerCase() == 'tumblr',\n" +
     "\t\t\t\t\t\t\tma_btn: social.account.toLowerCase() == 'mail'\n" +
-    "\t\t\t\t\t\t}\"><a href={{social.url}}></a></li></ul></div></div><div class=projectBody ng-bind-html=project.body></div></div></div><div id=projectImages><section ng-repeat=\"section in imageSections\"><h3>{{section.label}}</h3><div class=imageWrapper><div ng-repeat=\"image in section.images\" class=imageBox ng-class=\"{halfImage: section.images.length > 1}\"><img ng-src={{image.url}} alt={{image.alt}}></div></div></section></div><div id=readAbout><section ng-repeat=\"story in project.content.read_about\"><a href={{story.url}} target=_blank><p>{{story.title}}</p><h3>{{story.source}}</h3></a></section></div><div id=relatedProjects><section ng-repeat=\"related in project.content.related_projects\" ng-click=viewProject(related.id)><div class=imgWrapper><img ng-src={{related.image}}></div><p>{{related.title}}</p><h3>{{related.client}}</h3></section></div>"
+    "\t\t\t\t\t\t}\"><a href={{social.url}}></a></li></ul></div></div><div class=projectBody ng-bind-html=project.body></div></div></div><div id=projectImages ng-if=imageSections.length><section ng-repeat=\"section in imageSections\"><h6>{{section.label}}</h6><div class=imageWrapper><div ng-repeat=\"image in section.images\" class=imageBox ng-class=\"{halfImage: section.images.length > 1}\"><img ng-src={{image.url}} alt={{image.alt}}></div></div></section></div><div id=readAbout ng-if=project.content.read_about.length><h3>Read More About {{project.content.client}}</h3><section ng-repeat=\"story in project.content.read_about\"><a href={{story.url}} target=_blank><p>{{story.title}}</p><h4>{{story.source}}</h4></a></section></div><div id=relatedProjects ng-if=project.content.related_projects.length><h3>Related Projects</h3><section ng-repeat=\"related in project.content.related_projects\" ng-click=viewProject(related.id)><div class=imgWrapper><img ng-src={{related.image}}></div><div class=contentWrapper><p>{{related.title}}</p><h4>{{related.client}}</h4></div></section></div>"
   );
 
 
   $templateCache.put('partials/projects.html',
-    "<div class=blurb><h1 under-z str={{blurb.title}}></h1><div ng-bind-html=blurb.body></div></div><grid></grid>"
+    "<div class=blurb><h1 under-z str={{blurb.title}}></h1><div ng-bind-html=blurb.body></div></div><grid data-grid=projects></grid>"
   );
 
 
   $templateCache.put('partials/team.html',
-    "<div class=blurb><h1 under-z str={{blurb.title}}></h1><div ng-bind-html=blurb.body></div></div><grid></grid>"
+    "<div class=blurb><h1 under-z str={{blurb.title}}></h1><div ng-bind-html=blurb.body></div></div><grid data-grid=members></grid>"
   );
 
 }]);

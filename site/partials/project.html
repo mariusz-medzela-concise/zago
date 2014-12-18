@@ -61,9 +61,9 @@
 	</div>
 </div>
 
-<div id="projectImages">
+<div id="projectImages" ng-if="imageSections.length">
 	<section ng-repeat="section in imageSections">
-		<h3>{{section.label}}</h3>
+		<h6>{{section.label}}</h6>
 		<div class="imageWrapper">
 			<div ng-repeat="image in section.images" class="imageBox" ng-class="{halfImage: section.images.length > 1}">
 				<img ng-src="{{image.url}}" alt="{{image.alt}}">
@@ -72,22 +72,26 @@
 	</section>
 </div>
 
-<div id="readAbout">
+<div id="readAbout" ng-if="project.content.read_about.length">
+	<h3>Read More About {{project.content.client}}</h3>
 	<section ng-repeat="story in project.content.read_about">
 		<a href="{{story.url}}" target="_blank">
 			<p>{{story.title}}</p>
-			<h3>{{story.source}}</h3>
+			<h4>{{story.source}}</h4>
 		</a>
 	</section>
 </div>
 
-<div id="relatedProjects">
+<div id="relatedProjects" ng-if="project.content.related_projects.length">
+	<h3>Related Projects</h3>
 	<section ng-repeat="related in project.content.related_projects" ng-click="viewProject(related.id)">
 		<div class="imgWrapper">
 			<img ng-src="{{related.image}}">
 		</div>
-		<p>{{related.title}}</p>
-		<h3>{{related.client}}</h3>
+		<div class="contentWrapper">
+			<p>{{related.title}}</p>
+			<h4>{{related.client}}</h4>
+		</div>
 	</section>
 </div>
 

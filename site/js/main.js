@@ -372,7 +372,8 @@ app.factory('SiteLoader', function($http, $q){
                                 'position' : ternValue(post.acf.position),
                                 'linkedin_url' : ternValue(post.acf.linkedin_url),
                                 'featured_image' : (post.acf.profile_picture && post.acf.profile_picture.url) ? post.acf.profile_picture.url : null,
-                                'funny_picture' : (post.acf.funny_picture && post.acf.funny_picture.url) ? post.acf.funny_picture.url : null
+                                'funny_picture' : (post.acf.funny_picture && post.acf.funny_picture.url) ? post.acf.funny_picture.url : null,
+                                'accounts' : ternValue(post.acf.accounts)
                             };
 
                             tree.team.images.push(temp.content.featured_image);
@@ -712,8 +713,8 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
 
     // Data Elements
     ////////////////////////////////////////////////////////////////
-    var eventListeners = []; // Store page-specific eventListeners for removal in stateChange
-    var preloadedImages = []; // Store preloaded pageView src's so image loading isn't repeated
+    var eventListeners = []; // Stor
+    var preloadedImages = []; // Store preloaded pageView src's so image loading isn't repeatede page-specific eventListeners for removal in stateChange
 
     // DOM Elements
     ////////////////////////////////////////////////////////////////
@@ -956,182 +957,319 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
 
 ////////////////////////////////////////////////////////////////////////////////////
 
+// app.directive('grid', function($compile, $http, $templateCache) {
+
+//     function newDiv(classes) {
+//         var elem = document.createElement('div');
+//         elem.setAttribute('class', classes || '');
+
+//         return elem;
+//     };
+
+//     var getTemplate = function(contentType) {
+//         var baseUrl = '../pieces/';
+//         var templateMap = {
+//             members: 'team_section.html',
+//             projects: 'project_section.html'
+//         };
+
+//         var templateUrl = baseUrl + templateMap[contentType];
+//         var templateLoader = $http.get(templateUrl, {cache: $templateCache});
+
+//         return templateLoader;
+
+//     }
+
+//     var linker = function(scope, element, attrs) {
+
+//         function parseSections(sections, template){
+
+//             var wrapper = newDiv('directiveElement');
+//             var i, gridWrapper, gridSection, section;
+
+//             for(i = 0; sections.length > i; i++ ) {
+
+//                 section = newDiv('ngTemplate '+i); // dummy for sections[i] (ngTemplate)
+
+//                 // for Every 3 sections (or the first) create a new .grid div
+//                 if (i % 3 == 0) {  
+//                     gridSection = newDiv('grid');
+//                     // If its a new set of 6 (or the first)
+//                     if (i % 6 == 0) { 
+//                         // create new .gridWrapper and set .grid to .gridLeft
+//                         gridWrapper = newDiv('gridWrapper');
+//                         wrapper.appendChild(gridWrapper);
+//                         gridSection.classList.add('gridLeft');
+//                     // if its the second set of 3, just set .grid to .gridRight
+//                     } else { gridSection.classList.add('gridRight'); }
+
+//                     gridWrapper.appendChild(gridSection);
+//                 }
+
+//                 // Populate/link template data and append to wrap system
+//                 gridSection.appendChild(section);  
+//             };
+
+//             return wrapper;
+
+//         };
+
+//         // Retieve gridType and scope[sections] from element data attribute
+//         var gridType = element[0].dataset.grid;
+//         var sections = scope.$parent[gridType];
+//         var loader = getTemplate(gridType);
+
+//         var promise = loader.success(function(html) {
+//                     element.html(html);
+//             }).then(function (response) {
+                
+//                 console.log(element);
+//                 element.replaceWith($compile(element.html())(scope));
+//                 console.log(element);
+//             });
+
+//         // var promise = loader.success(function(html) {
+//         //         element.html(parseSections(sections, html, scope));
+//         //     }).then(function (response) {
+                
+//         //         console.log(element);
+//         //         element.replaceWith($compile(element.html())(scope));
+//         //         console.log(element);
+//         //     });
+//     };
+
+//     return {
+//         restrict: "E",
+//         link: linker,
+
+//         scope: {
+//             content:'='
+//         }
+//     };
+
+
+// });
+
+
+
 app.directive('grid', function($compile) {
 
-    // This is a really horrible directive to dynamically load the 6-box grid that's
-    // used on the projects overview and team page. I could not figure out how to use
-    // a modulo repeater function with an Angular template to dynamically produce the grid. This
-    // was the best i could come up with at the time. It works, but it's ugly and i don't
-    // like it.
+        // @BUG This is a really horrible directive to dynamically load the 6-box grid that's
+        // used on the projects overview and team page. I could not figure out how to use
+        // a modulo repeater function with an Angular template to dynamically produce the grid. This
+        // was the best i could come up with at the time. It works, but it's ugly and i don't
+        // like it.
 
-    var data, view;
-    var linker = function(scope, element, attrs) {
-        switch(scope.$parent.pageView) {
-            case 'projectsOverviewPage':
-                data = scope.$parent.projects;
-                view = 'projects';
-                break;
-            case 'teamPage':
-                data = scope.$parent.members;
-                view = 'team';
-                break;
-        }
-        // Send to format function and append to element
-        element.html(getTemplate(data));
-        // Compile for Angular functionality
-        $compile(element.contents())(scope);
-        addEventListeners(scope);
-    }
-
-    var getTemplate = function(data){
-        // Template strings
-        var newWrapper = function(){
-            var temp = document.createElement('div');
-            switch(view) {
-                case 'projects':
-                    temp.setAttribute('class', 'gridWrapper projectWrapper');
+        var data, view;
+        var linker = function(scope, element, attrs) {
+            switch(scope.$parent.pageView) {
+                case 'projectsOverviewPage':
+                    data = scope.$parent.projects;
+                    view = 'projects';
                     break;
-                case 'team':
-                    temp.setAttribute('class', 'gridWrapper teamWrapper');
+                case 'teamPage':
+                    data = scope.$parent.members;
+                    view = 'team';
                     break;
             }
-
-            return temp;
+            // Send to format function and append to element
+            element.html(getTemplate(data));
+            // Compile for Angular functionality
+            $compile(element.contents())(scope);
+            addEventListeners(scope);
         }
 
-        var newGrid = function(i){
-            var grid = document.createElement('div');
-            grid.setAttribute('class', 'grid');
+        var getTemplate = function(data){
+            // Template strings
+            var newWrapper = function(){
+                var temp = document.createElement('div');
+                switch(view) {
+                    case 'projects':
+                        temp.setAttribute('class', 'gridWrapper projectWrapper');
+                        break;
+                    case 'team':
+                        temp.setAttribute('class', 'gridWrapper teamWrapper');
+                        break;
+                }
 
-            // Assign left or right depending on which group of 3
-            if (i % 6 == 0) { grid.classList.add('gridLeft') }
-            else { grid.classList.add('gridRight') }
-
-            return grid;
-        }
-
-        var newSection = function(data){
-
-            // Create Section element
-            var sec = document.createElement('section');
-            sec.setAttribute('data-id', data.id);
-            // Create wrapper element for img & overlay
-            var imgWrap = document.createElement('div');
-            imgWrap.setAttribute('class', 'imgWrapper');
-            // Create Img Element
-            var img = document.createElement('img');
-            img.setAttribute('ng-src', data.content.featured_image); // @todo fix projects bug
-            imgWrap.appendChild(img);
-            if (data.content.funny_picture) {
-                var img2 = document.createElement('img');
-                img2.setAttribute('ng-src', data.content.funny_picture);
-                imgWrap.appendChild(img2);
+                return temp;
             }
-            // Create Overlay
-            var ovrly = document.createElement('div');
-            ovrly.setAttribute('class', 'overlay');
-            // Create Title Elements
-            var h2 = document.createElement('h2');
-            h2.innerHTML = data.title;
-            var h3 = document.createElement('h3');
-            var h3Text;
-            switch(view) {
-                case 'projects':
+
+            var newGrid = function(i){
+                var grid = document.createElement('div');
+                grid.setAttribute('class', 'grid');
+
+                // Assign left or right depending on which group of 3
+                if (i % 6 == 0) { grid.classList.add('gridLeft') }
+                else { grid.classList.add('gridRight') }
+
+                return grid;
+            }
+
+            var newSection = function(data){
+
+                // Create Section element
+                var sec = document.createElement('section');
+                sec.setAttribute('data-id', data.id);
+                // Create wrapper element for img & overlay
+                var imgWrap = document.createElement('div');
+                imgWrap.setAttribute('class', 'imgWrapper');
+                // Create Img Element
+                var img = document.createElement('img');
+                img.setAttribute('ng-src', data.content.featured_image); // @todo fix projects bug
+                imgWrap.appendChild(img);
+                if (data.content.funny_picture) {
+                    var img2 = document.createElement('img');
+                    img2.setAttribute('ng-src', data.content.funny_picture);
+                    imgWrap.appendChild(img2);
+                }
+                // Create Overlay
+                var ovrly = document.createElement('div');
+                ovrly.setAttribute('class', 'overlay');
+                // Create Title Elements
+                var h2 = document.createElement('h2');
+                h2.innerHTML = data.title;
+                var h3 = document.createElement('h3');
+                var h3Text;
+
+                if (view === 'projects') {
                     h3Text = data.content.client;
-                    imgWrap.appendChild(ovrly);
-                    break;
-                case 'team':
+                    imgWrap.appendChild(ovrly); }
+                else if (view === 'team') {
+
                     h3Text =  data.content.position;
+
                     if (data.content.linkedin_url) {
                         var anchorWrap = document.createElement('div');
-                        anchorWrap.setAttribute('class', 'anchorWrapper');
+                        anchorWrap.setAttribute('class', 'anchorWrapper li_btn');
                         var anchor = document.createElement('a');
                         anchor.setAttribute('href', data.content.linkedin_url);
                         anchor.setAttribute('target', '_blank');
                         anchorWrap.appendChild(anchor);
                         imgWrap.appendChild(anchorWrap);
                     }
-                    break;
+
+                    if (data.content.accounts && data.content.accounts.length) {
+                        for (var d = 0; data.content.accounts.length > d; d++) {
+                            var newLink = document.createElement('div');
+
+                            var linkClass;
+                            switch(data.content.accounts[d].account.toLowerCase()) {
+                                case 'facebook':
+                                    linkClass = 'fb_btn';
+                                    break;
+                                case 'twitter':
+                                    linkClass = 'tw_btn';
+                                    break;
+                                case 'behance':
+                                    linkClass = 'be_btn';
+                                    break;
+                                case 'pinterest':
+                                    linkClass = 'pi_btn';
+                                    break;
+                                case 'linkedin':
+                                    linkClass = 'li_btn';
+                                    break;
+                                case 'tumblr':
+                                    linkClass = 'tr_btn';
+                                    break;
+                                case 'youtube':
+                                    linkClass = 'yt_btn';
+                                    break;
+                                default:
+                                    linkClass = 'other_btn';
+                            }
+
+
+                            newLink.setAttribute('class', 'anchorWrapper ' + linkClass);
+
+                            var anch = document.createElement('a');
+                            anch.setAttribute('href', data.content.accounts[d].url);
+                            anch.setAttribute('target', '_blank');
+                            newLink.appendChild(anch);
+                            imgWrap.appendChild(newLink);
+                        }
+                    }
+                }
+
+                h3.innerHTML = h3Text;
+
+                // Append Section Elements together
+                sec.appendChild(imgWrap);
+                sec.appendChild(h2);
+                sec.appendChild(h3);
+
+                return sec;
             }
 
-            h3.innerHTML = h3Text;
 
-            // Append Section Elements together
-            sec.appendChild(imgWrap);
-            sec.appendChild(h2);
-            sec.appendChild(h3);
+            var grid, wrapper;
+            var allProjects = document.createElement('div');
+            // Iterate thru tree, format template
+            for (var i = 0; data.length > i; i++) {
+                // Create new project section module
+                var proj = newSection(data[i]);
 
-            return sec;
+                // Create grid if first of a new group of 3
+                if (i % 3 == 0) {
+                    // if already inside of a grid
+                    if (grid) { wrapper.appendChild(grid); }
+                    // Finsih last grid, create new one
+                    grid = newGrid(i);
+                    // Create wrapper if first of a new group of 6
+                    if (i % 6 == 0) {
+                        // if already inside of a wrapper
+                        if (wrapper) { allProjects.appendChild(wrapper); }
+                        wrapper = newWrapper(); 
+                    }
+                }
+
+                // Attach section to grid if no new wrappers or grid are created
+                grid.appendChild(proj);
+
+                // Attach grid to wrapper if final loop iteration
+                if (i == (data.length - 1)) {
+                    wrapper.appendChild(grid);
+                    allProjects.appendChild(wrapper);
+                }
+            };
+
+            return allProjects;
         }
 
-
-        var grid, wrapper;
-        var allProjects = document.createElement('div');
-        // Iterate thru tree, format template
-        for (var i = 0; data.length > i; i++) {
-            // Create new project section module
-            var proj = newSection(data[i]);
-
-            // Create grid if first of a new group of 3
-            if (i % 3 == 0) {
-                // if already inside of a grid
-                if (grid) { wrapper.appendChild(grid); }
-                // Finsih last grid, create new one
-                grid = newGrid(i);
-                // Create wrapper if first of a new group of 6
-                if (i % 6 == 0) {
-                    // if already inside of a wrapper
-                    if (wrapper) { allProjects.appendChild(wrapper); }
-                    wrapper = newWrapper(); 
+        function addEventListeners(scope){
+            // Add a hover effect for the image overlay when img or headers are hovered over
+            $('.projectWrapper .grid section > *').hover(
+                function(){
+                    $(this.parentNode).children('.imgWrapper').children('.overlay').addClass('open');
+                },
+                function(){
+                    $(this.parentNode).children('.imgWrapper').children('.overlay').removeClass('open');
                 }
-            }
-
-            // Attach section to grid if no new wrappers or grid are created
-            grid.appendChild(proj);
-
-            // Attach grid to wrapper if final loop iteration
-            if (i == (data.length - 1)) {
-                wrapper.appendChild(grid);
-                allProjects.appendChild(wrapper);
-            }
+            ).click(function(){
+                var project;
+                try {
+                    project = this.parentNode.dataset.id;
+                } catch(e) {
+                    for (var i = 0; this.parentNode.attributes.length > i; i++) {
+                        if (this.parentNode.attributes[i].nodeName = "data-id") {
+                            project = this.parentNode.attributes[i].nodeValue;
+                            break;
+                        }
+                    };
+                }
+                scope.$parent.viewProject(project);
+            });
+            
         };
 
-        return allProjects;
-    }
-
-    function addEventListeners(scope){
-        // Add a hover effect for the image overlay when img or headers are hovered over
-        $('.projectWrapper .grid section > *').hover(
-            function(){
-                $(this.parentNode).children('.imgWrapper').children('.overlay').addClass('open');
-            },
-            function(){
-                $(this.parentNode).children('.imgWrapper').children('.overlay').removeClass('open');
+        return {
+            restrict: "E",
+            link: linker,
+            scope: {
+                content:'='
             }
-        ).click(function(){
-            var project;
-            try {
-                project = this.parentNode.dataset.id;
-            } catch(e) {
-                for (var i = 0; this.parentNode.attributes.length > i; i++) {
-                    if (this.parentNode.attributes[i].nodeName = "data-id") {
-                        project = this.parentNode.attributes[i].nodeValue;
-                        break;
-                    }
-                };
-            }
-            scope.$parent.viewProject(project);
-        });
-        
-    };
-
-    return {
-        restrict: "E",
-        link: linker,
-        scope: {
-            content:'='
-        }
-    };
+        };
 });
 
 app.directive('officeList', function() {
@@ -1319,16 +1457,15 @@ app.controller('HomeCtrl', function($scope, $rootScope, $timeout, $interval, Fun
             doneOnce = true;
             try { // Workaround for $rootScope.$on checking on every view instead of just homePage
                 $scope.rotateHeros();
-                setDimensions(); // @BUG This is firing before DOM is fully loaded
-                pinMenu();
-                Functions.setListener(window, 'scroll', Functions.throttle(pinMenu, 10));
-                Functions.setListener(window, 'resize', Functions.throttle(setDimensions, 10)); }
+                $timeout(function(){ setDimensions(); });
+                Functions.setListener(window, 'resize', Functions.throttle(setDimensions, 10));
+                Functions.setListener(window, 'scroll', Functions.throttle(pinMenu, 10)); }
             catch (error) { }
         }
     });
 
     var pieces; // Get & Set Dimensions and add menu scroll listener once Preloader finishes
-    function setDimensions(){ pieces = getDimensions(); };
+    function setDimensions(){ pieces = getDimensions(); pinMenu(); };
 
     function getDimensions(){
         var dims = {
@@ -1383,7 +1520,7 @@ app.controller('HomeCtrl', function($scope, $rootScope, $timeout, $interval, Fun
     $scope.activeBanner = 0;
     $scope.lastBanner;
 
-    $scope.rotateHeros = function(idx){
+    $scope.rotateHeros = function(){
         var elems = document.getElementById('heroBanner').children;
         var images = [];
         // Get IMG Tags
@@ -1393,15 +1530,12 @@ app.controller('HomeCtrl', function($scope, $rootScope, $timeout, $interval, Fun
         }   }
 
         var waitTiming = 4000; // how long each slide remains active
-        var slideTiming = 1500; // CSS transition timing
 
         // Set rotation interval
         $interval(function(){ // @BUG This is acting funny, 95% working, but has some weird issues
-            $scope.lastBanner = $scope.activeBanner;
             // If img is last in array, set NEXT to first image, else set to next image in array
-            if (($scope.activeBanner+1) == images.length) { $scope.activeBanner = 0; }
-            else { $scope.activeBanner++; }
-            $timeout(function(){ $scope.lastBanner = null; }, slideTiming); // wait for css transition before unsetting lastBanner
+            $scope.lastBanner = $scope.activeBanner;
+            $scope.activeBanner = ($scope.activeBanner + 1) % images.length;
         }, waitTiming);
     };
 
