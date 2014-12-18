@@ -116,7 +116,7 @@ ul {
 			background-repeat: no-repeat;
 			background-size: 50% auto;
 			border-right: 1px solid $darkgrey;
-			@include transition(background);
+			@include transition(background-color);
 			&:last-of-type {
 				border-right: 0; }
 			a {
@@ -125,20 +125,64 @@ ul {
 				height: 100%; }
 			&:hover {
 				background-color: $grey; }
+			&.invert {
+				background-color: transparent;
+				&:hover {
+					background-color: white; } }
 			&.fb_btn {
-				background-position: 65% -2%; }
+				background-position: 72% -1.5%;
+				&.invert {
+					background-position: 72% 5%;
+					&:hover {
+						background-position: 72% -1.5%;; } } }
 			&.tw_btn {
-				background-position: 45% 5.9%; }
-			&.be_btn {
-				background-position: 49% 30.25%; }
-			&.pi_btn {
-				background-position: 57% 22.5%; }
+				background-position: 50% 11.25%;
+				&.invert {
+					background-position: 50% 17.25%;
+					&:hover {
+						background-position: 50% 11.25%; } } }
 			&.li_btn {
-				background-position: 48% 14.25%; }
+				background-position: 50% 23.5%;
+				&.invert {
+					background-position: 50% 29.75%;
+					&:hover {
+						background-position: 50% 23.5%; } } }
+			&.pi_btn {
+				background-position: 60% 36%;
+				&.invert {
+					background-position: 60% 36%;
+					&:hover {
+						background-position: 60% 36%; } } }
+			&.be_btn {
+				background-position: 50% 48.25%;
+				&.invert {
+					background-position: 50% 48.25%;
+					&:hover {
+						background-position: 50% 48.25%; } } }
 			&.ma_btn {
-				background-position: 49% 37.75%; }
+				background-position: 50% 59.5%;
+				&.invert {
+					background-position: 50% 59.5%;
+					&:hover {
+						background-position: 50% 59.5%; } } }
 			&.tr_btn {
-				background-position: 55% 45.75%; }
+				background-position: 60% 71.25%;
+				&.invert {
+					background-position: 60% 71.25%;
+					&:hover {
+						background-position: 60% 71.25%; } } }
+			&.yt_btn {
+				background-position: 50% 83.75%;
+				&.invert {
+					background-position: 50% 83.75%;
+					&:hover {
+						background-position: 50% 83.75%; } } }
+			&.ot_btn {
+				background-position: 50% 95.25%;
+				&.invert {
+					background-position: 50% 95.25%;
+					&:hover {
+						background-position: 50% 95.25%; } } }
 		}
 	}
 }
@@ -1212,38 +1256,31 @@ nav {
 						min-height: 90vw;
 						&:first-of-type {
 							z-index: 150; } }
-					.anchorWrapper {
-						width: 30px;
-						height: 30px;
-						position: absolute;
-						top: 0; right: 0;
-						z-index: 200;
-						border: 1px solid white;
-						border-top: 0; border-right: 0;
-						a {
-							display: block;
-							width: 100%;
-							height: 100%;
-							position: relative;
-							&::after {
-								content: '';
-								width: 100%;
-								height: 100%;
-								background-image: url('../images/social_sprites.png');
-								background-position: 48% 70.5%;
-								background-repeat: no-repeat;
-								background-size: 50% auto;
-								position: absolute;
-								top: 50%; left: 50%;
-								@include translate(-50%, -50%); } }
-						&:hover {
-							background-color: white;
+					ul.socialButtons {
+						border: 0;
+						li.anchorWrapper {
+							width: 30px;
+							height: 30px;
+							z-index: 200;
+							border: 1px solid white;
+							border-top: 0; border-right: 0;
+							@include transition(none);
+							position: absolute;
+							top: 0; 
+							&:nth-of-type(1) { right: 0; }
+							&:nth-of-type(2) { right: 30px; }
+							&:nth-of-type(3) { right: 60px; }
 							a {
-								&::after {
-									background-position: 48% 14.25%; } } }
-						@include breakpoint(desktop) {
-							width: 2.25em; height: 2.25em;
-							width: 2.25vw; height: 2.25vw; }
+								display: block;
+								width: 100%;
+								height: 100%; }
+							&:hover {
+								background-color: white; }
+							@include breakpoint(desktop) {
+								width: 2.25em; height: 2.25em;
+								width: 2.25vw; height: 2.25vw;
+								&:nth-of-type(2) { right: 2.25vw; }
+								&:nth-of-type(3) { right: 4.5vw; } } }
 		} } } }
 		@include breakpoint(smallTablet) {
 			.grid {
