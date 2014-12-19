@@ -145,7 +145,7 @@ app.factory('SiteLoader', function($http, $q, $rootScope){
         'getRawData' : function(){
 
             $rootScope.isLoading = true;
-            
+
             var deferred = $q.defer();
             // If some fucked up IE feature exists, use it
             if(window.XDomainRequest){
@@ -354,7 +354,7 @@ app.factory('SiteLoader', function($http, $q, $rootScope){
                     var details = [];
                     // For each Related Project of currently selected project
                     for (var p = 0; related.length > p; p++) {
-                        // Loop thru each project and find ID match
+                        // Loop thru each project again and find ID match
                         for (var r = 0; projects.length > r; r++) {
                             if (related[p] == projects[r].id) {
                                 var obj = {
@@ -1159,7 +1159,7 @@ app.directive('grid', function($compile) {
                             account.setAttribute('class', 'anchorWrapper invert invertHover ' + linkClass);
 
                             anchor = document.createElement('a');
-                            anchor.setAttribute('href', data.content.accounts[d].url);
+                            anchor.setAttribute('href', ((data.content.accounts[d].account.toLowerCase() == 'mail') ? 'mailto:' : '') + data.content.accounts[d].url);
                             anchor.setAttribute('target', '_blank');
                             account.appendChild(anchor);
                             socialList.appendChild(account);
@@ -1396,20 +1396,20 @@ app.controller('AppCtrl', function($scope, $rootScope, Functions, Storage){
 
     // Splash Page configuration
     ////////////////////////////////////////////////////////////////////////////////////
-    (function splashPage() {
-        // If first time visiting site via mobile, flash splashpage
-        if (!Storage.splashed && (Modernizr.phone)) {
-            $scope.showSplash = true;
-            Functions.disableScroll(true);
-        }
-    })();
+    // (function splashPage() {
+    //     // If first time visiting site via mobile, flash splashpage
+    //     if (!Storage.splashed && (Modernizr.phone)) {
+    //         $scope.showSplash = true;
+    //         Functions.disableScroll(true);
+    //     }
+    // })();
 
-    // Button to hide splash page and show full site
-    $scope.hideSplash = function() {
-        Storage.splashed = true;
-        $scope.showSplash = false;
-        Functions.disableScroll(false);
-    };
+    // // Button to hide splash page and show full site
+    // $scope.hideSplash = function() {
+    //     Storage.splashed = true;
+    //     $scope.showSplash = false;
+    //     Functions.disableScroll(false);
+    // };
 
 });
 
