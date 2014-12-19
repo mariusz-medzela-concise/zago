@@ -13,12 +13,12 @@
 	</ul>
 </nav>
 
-<div id="projectLayout">
+<div id="projectLayout" ng-class="{caseStudy: project.content.case_study}">
 	<div class="featuredImage">
 		<img ng-src="{{project.content.featured_image.url}}" alt="{{project.content.featured_image.alt}}">
 	</div>
 	<div class="projectContent">
-		<h1 ng-bind-html="project.title"></h1>
+		<h1 ng-bind-html="project.title" ng-if="project.content.case_study"></h1>
 		<div class="projectDetails">
 			<div class="projectInfo">
 				<section>
@@ -59,7 +59,7 @@
 				</ul>
 			</div>
 		</div>
-		<div class="projectBody" ng-bind-html="project.body"></div>
+		<div class="projectBody" ng-bind-html="project.body" ng-if="project.content.case_study"></div>
 	</div>
 </div>
 
@@ -74,7 +74,7 @@
 	</section>
 </div>
 
-<div id="readAbout" ng-if="project.content.read_about.length">
+<div id="readAbout" ng-if="project.content.case_study && project.content.read_about.length">
 	<h3>Read More About {{project.content.client}}</h3>
 	<section ng-repeat="story in project.content.read_about">
 		<a href="{{story.url}}" target="_blank">
@@ -84,7 +84,7 @@
 	</section>
 </div>
 
-<div id="relatedProjects" ng-if="project.content.related_projects.length">
+<div id="relatedProjects" ng-if="project.content.case_study && project.content.related_projects.length">
 	<h3>Related Projects</h3>
 	<section ng-repeat="related in project.content.related_projects" ng-click="viewProject(related.id)">
 		<div class="imgWrapper">
