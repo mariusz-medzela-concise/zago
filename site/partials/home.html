@@ -1,5 +1,5 @@
-<div id="heroBanner">
-	<img ng-repeat="image in hero.content.images | orderBy:'order'" ng-src="{{image.url}}" ng-class="{showing: activeBanner == $index, last: lastBanner == $index}">
+<div id="heroBanner" image-loader rotate-images>
+	<img ng-repeat="image in hero.content.images | orderBy:'order'" ng-src="{{image.url}}" ng-class="{showing: activeBanner == $index, last: lastBanner == $index, isPortrait: image.isPortrat}" precision-image>
 	<h1>Zago</h1>
 	<p ng-bind-html="hero.content.banner_caption"></p>
 </div>
@@ -8,12 +8,12 @@
 	<div ng-bind-html="blurb.body"></div>
 	<nav id="sectionNav">
 		<ul>
-			<li ng-repeat="section in sections | orderBy:'order'" ng-click="anchorTo(section.content.image_caption.firstWord())" ng-class="{active: isActive == section.content.image_caption.firstWord()}">{{section.content.image_caption.firstWord()}}</a>
+			<li ng-repeat="section in sections | orderBy:'order'" ng-click="anchorTo(section.content.caption.firstWord())" ng-class="{active: isActive == section.content.caption.firstWord()}">{{section.content.caption.firstWord()}}</a>
 			</li>
 		</ul>
 	</nav>
 </div>
 
 <div id="homeSections">
-	<section id="{{section.content.image_caption.firstWord()}}" ng-repeat="section in sections | orderBy:'order'" home-sections></section>
+	<section id="{{section.content.caption.firstWord()}}" ng-repeat="section in sections | orderBy:'order'" home-sections></section>
 </div>

@@ -1,8 +1,14 @@
 <!DOCTYPE html>
-<html lang="en" ng-app="app">
+<html lang="en" xml:lang="en" ng-app="app">
 <head>
-    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- *** Google Chrome mis-autotranslate fix *** -->
+    <meta charset="UTF-8" />
+    <meta name="google" content="notranslate">
+    <meta http-equiv="Content-Language" content="en_US">
+    <!-- ******************************************* -->
     <base href="/" > <!-- Allows for Angular deep-linking -->
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Zago | Under Construction</title>
     <link rel="icon" type="image/png" href="images/favicon.ico">
     <link rel="stylesheet" href="css/style.css" />
     <script src="js/enhance.js"></script> <!-- Custom javaScript prototype functions -->
@@ -25,7 +31,7 @@
 <body id="body" ng-controller="AppCtrl">
     <!-- @BUG {pageLoading:isLoading || isRouting} controls the page view sliding offscreen to the right -->
     <!-- It works, but its very buggy. Basically CSS animates the page in/out based on Angular value -->
-    <div id="container" ng-class="{pageLoading:isLoading}">
+    <div id="container">
 
         <img id="siteID" class="siteID" alt="Zago LLC Logo" src="images/zago_logo.png" ng-click="route('home', true)">
 
@@ -50,15 +56,19 @@
 
         <button id="scrollTop" type="button" ng-click="scrollTop()"></button>
 
-        <div id="pageContent" class="{{pageView}}" ng-class="{pageLoading: isLoading}" ui-view autoscroll="true"><!-- Angular Partials go here --></div>
+        <div id="pageContent" class="{{pageView}}" ui-view autoscroll="true"><!-- Angular Partials go here --></div>
 
-        <footer id="footer" ng-class="{pageLoading: isLoading, homePage: pageView == 'homePage', lovePage: pageView == 'lovePage'}">
-            <div office-list></div>
+        <footer id="footer" ng-class="{homePage: pageView == 'homePage', lovePage: pageView == 'lovePage'}">
+            <section class="collaboration">
+                <p>Let's work together. Come have coffee & say ciao.</p>
+                <p><a href="mailto:info@zagollc.com">info@zagollc.com</a>.</p>
+            </section>
             <section class="intern">
                 <p>We take interns in NYC for
                 3 to 6 month engagements.<br>Inquire at </p>
                 <a href="mailto:intern@zagollc.com">intern@zagollc.com</a>
             </section>
+            <div office-list></div>
             <section class="social" social-buttons></section>
         </footer>
 
@@ -69,7 +79,7 @@
             <button type="button" ng-click="hideSplash()">Full Site</button> 
         </div> -->
 
-        <div id="cssTest">
+        <!-- <div id="cssTest">
             <p class="cssvwunit">No vw units</p>
 
             <p class="mobilegradea">No mobile grade a</p>
@@ -77,17 +87,10 @@
             <p class="overthrow-enabled">No overthrow-enabled</p>
             <p class="cssvhunit">No vh units</p>
             <p class="localstorage">No localStorage</p>
-        </div>
+        </div> -->
 
     </div>
-    <div id="loader">
-        <div class="beaconWrapper">
-            <div class="beacon">
-                <div class="percentComplete" style="width:{{percentLoaded-10}}%; height:{{percentLoaded-10}}%;"></div>
-                <!-- <p>{{percentLoaded}}%</p> -->
-            </div>
-        </div>
-    </div> 
+
     <script src="http://localhost:35729/livereload.js"></script> 
     <!-- redirect to legacy browser unsupported message -->
     <!--[if lt IE 9]> <script type="text/javascript" src="js/unsupported.js"></script> <![endif]-->

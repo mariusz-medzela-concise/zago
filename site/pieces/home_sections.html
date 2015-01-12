@@ -1,6 +1,6 @@
 <div class="bannerWrapper">
-	<div class="imgWrapper">
-		<img ng-src="{{section.content.image_url}}">
+	<div class="imgWrapper" image-loader>
+		<img ng-src="{{section.content.url}}" ng-class="{isPortrait: section.content.isPortrait}">
 	</div>
 	<div class="captionWrapper">
 		<p><span class="color" ng-class="caption.color">{{caption.first}}</span></p>
