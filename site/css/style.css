@@ -150,6 +150,25 @@ article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, 
   left: -9999px;
   right: -9999px;
   margin: auto;
+  min-height: 100%;
+  min-width: 100%;
+  width: 100%;
+}
+.absoluteCenter.top, .beaconWrapper .top.beacon, #heroBanner img.top, #homeSections section .bannerWrapper .imgWrapper img.top, .gridWrapper .grid section .imgWrapper img.top, #projectLayout .featuredImage img.top, #projectImages section .imageWrapper .imageBox img.top, #relatedProjects section .imgWrapper img.top {
+  top: 0;
+  bottom: initial;
+}
+.absoluteCenter.bottom, .beaconWrapper .bottom.beacon, #heroBanner img.bottom, #homeSections section .bannerWrapper .imgWrapper img.bottom, .gridWrapper .grid section .imgWrapper img.bottom, #projectLayout .featuredImage img.bottom, #projectImages section .imageWrapper .imageBox img.bottom, #relatedProjects section .imgWrapper img.bottom {
+  bottom: 0;
+  top: initial;
+}
+.absoluteCenter.left, .beaconWrapper .left.beacon, #heroBanner img.left, #homeSections section .bannerWrapper .imgWrapper img.left, .gridWrapper .grid section .imgWrapper img.left, #projectLayout .featuredImage img.left, #projectImages section .imageWrapper .imageBox img.left, #relatedProjects section .imgWrapper img.left {
+  left: 0;
+  right: initial;
+}
+.absoluteCenter.right, .beaconWrapper .right.beacon, #heroBanner img.right, #homeSections section .bannerWrapper .imgWrapper img.right, .gridWrapper .grid section .imgWrapper img.right, #projectLayout .featuredImage img.right, #projectImages section .imageWrapper .imageBox img.right, #relatedProjects section .imgWrapper img.right {
+  right: 0;
+  left: initial;
 }
 
 /*************************************************/
@@ -372,6 +391,9 @@ footer section {
   padding-right: 2%;
   margin-bottom: 30px;
 }
+footer section.collaboration {
+  display: none;
+}
 @media (min-width: 640px) {
   footer section {
     width: 24%;
@@ -397,16 +419,16 @@ footer section a:hover {
   text-decoration: underline;
   color: black;
 }
-footer section.info p, footer section.intern p {
+footer section.intern p {
   display: inline;
   white-space: pre-line;
 }
 @media (max-width: 639px) {
-  footer section.info p, footer section.intern p {
+  footer section.intern p {
     white-space: normal;
   }
 }
-footer section.info a, footer section.intern a {
+footer section.intern a {
   text-decoration: underline;
 }
 footer section.info {
@@ -483,11 +505,23 @@ footer.homePage section {
   font-size: 1.2em;
   margin-bottom: 35px;
 }
+footer.homePage section.collaboration {
+  display: block;
+}
+footer.homePage section.collaboration p {
+  line-height: 1.5;
+  letter-spacing: .075;
+  text-transform: uppercase;
+  font-family: 'Black';
+}
+footer.homePage section.collaboration p a {
+  text-decoration: underline;
+}
 @media (min-width: 640px) {
   footer.homePage section {
     width: 33%;
   }
-  footer.homePage section.info, footer.homePage section.intern, footer.homePage section.social {
+  footer.homePage section.collaboration, footer.homePage section.intern, footer.homePage section.social {
     width: 100%;
   }
 }
@@ -496,11 +530,11 @@ footer.homePage section {
     width: 25%;
   }
 }
-footer.homePage section.info, footer.homePage section.intern {
+footer.homePage section.collaboration, footer.homePage section.intern {
   display: block;
   width: 100%;
 }
-footer.homePage section.intern p {
+footer.homePage section.collaboration p, footer.homePage section.intern p {
   white-space: normal;
 }
 footer.homePage section.social {
@@ -572,6 +606,8 @@ footer.pageLoading {
 
 #pageContent {
   width: 100%;
+  min-height: 100em;
+  min-height: 100vh;
   overflow: auto;
   position: relative;
 }
@@ -590,6 +626,103 @@ footer.pageLoading {
   z-index: 0;
 }
 
+.loaderWrapper {
+  background-color: #e6e6e6 !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+.loaderWrapper img {
+  z-index: 5;
+}
+
+.loaderBox {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 0;
+  width: 100px;
+  height: 100px;
+  -webkit-transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  -o-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+.loaderBox .loader {
+  border: 1em solid rgba(255, 255, 255, 0.2);
+  border-left: 1em solid #ffffff;
+  -webkit-animation: load8 1s infinite linear;
+  animation: load8 1s infinite linear;
+}
+.loaderBox .loader, .loaderBox .loader:after {
+  position: absolute;
+  top: -1em;
+  left: -1em;
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+}
+
+@-webkit-keyframes load8 {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+@-moz-keyframes load8 {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+@-ms-keyframes load8 {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+@-o-keyframes load8 {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes load8 {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
 .beaconWrapper {
   position: relative;
   height: 100%;
@@ -599,6 +732,8 @@ footer.pageLoading {
   width: 150px;
   height: 150px;
   line-height: 150px;
+  min-width: initial;
+  min-height: initial;
   /*.percentComplete {
   	min-width: 0%;
   	min-height: 0%;
@@ -904,8 +1039,8 @@ img.siteID {
 }
 
 p#menuPrompt {
-  position: relative;
-  bottom: 25px;
+  position: absolute;
+  bottom: 180%;
   right: 50%;
   -webkit-transform: translate(50%, 0);
   -moz-transform: translate(50%, 0);
@@ -1062,7 +1197,7 @@ nav#mainNav #menuWrapper {
   overflow: hidden;
   *zoom: 1;
   margin: 0 auto;
-  padding: 150px 0 25vh;
+  padding: 20vmin 0 25vmin;
   position: relative;
   z-index: 800;
 }
@@ -1082,12 +1217,17 @@ nav#mainNav #menuWrapper #menu ul li:last-of-type {
   margin-bottom: 0;
 }
 nav#mainNav #menuWrapper #menu ul li a {
-  font-size: 4.8em;
+  font-size: 12vmin;
   letter-spacing: .075em;
   font-weight: 600;
   text-transform: uppercase;
   position: relative;
   text-decoration: none;
+}
+@media (min-width: 640px) {
+  nav#mainNav #menuWrapper #menu ul li a {
+    font-size: 4.8em;
+  }
 }
 @media (min-width: 1400px) {
   nav#mainNav #menuWrapper #menu ul li {
@@ -1125,11 +1265,25 @@ nav#mainNav #menuWrapper #menu ul li a {
     padding-bottom: 50px !important;
   }
 }
+@media (max-width: 639px) and (orientation: landscape) {
+  nav#mainNav #menuWrapper {
+    display: block;
+  }
+  nav#mainNav #menuWrapper ul li {
+    float: left;
+    width: 50%;
+    margin: 0 0 20vmin !important;
+  }
+  nav#mainNav #menuWrapper ul li a {
+    font-size: 10vmax !important;
+  }
+}
 nav#projectNav {
   position: fixed;
   z-index: 800;
   backface-visibility: hidden;
   top: 50%;
+  top: 50vh;
   left: 0;
   /*@include translate(0, -50%);*/
   width: 50px;
@@ -1165,28 +1319,32 @@ nav#projectNav ul li .navTitle {
   border: 1px solid #040707;
   background-color: white;
   border-left: 0px;
-  padding: 10px;
   height: 30px;
-  width: 200px;
+  width: 0px;
   z-index: 500;
-  max-width: 0;
   opacity: 0;
   overflow: hidden;
-  -webkit-transition: all 0.5s ease-out;
-  -moz-transition: all 0.5s ease-out;
-  -ms-transition: all 0.5s ease-out;
-  -o-transition: all 0.5s ease-out;
-  transition: all 0.5s ease-out;
+  cursor: pointer;
+  white-space: nowrap;
+  -webkit-transition: width 0.5s ease-out;
+  -moz-transition: width 0.5s ease-out;
+  -ms-transition: width 0.5s ease-out;
+  -o-transition: width 0.5s ease-out;
+  transition: width 0.5s ease-out;
 }
 nav#projectNav ul li .navTitle h5 {
   width: 200px;
   font-size: 2em;
+  line-height: 1.75;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 nav#projectNav ul li:hover {
   background-color: #e6e6e6;
 }
 nav#projectNav ul li:hover .navTitle {
-  max-width: 200px;
+  padding: 10px;
+  width: 200px;
   opacity: 1;
 }
 @media (max-width: 639px) {
@@ -1333,9 +1491,6 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
 }
 .menuContacts section.info {
   margin-bottom: 0px;
-}
-.menuContacts section.info p {
-  display: none;
 }
 .menuContacts section.info a {
   /* info@zagollc */
@@ -1485,8 +1640,6 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
 }
 #heroBanner img {
   z-index: 150;
-  min-height: 100%;
-  min-width: 100%;
   -webkit-transform: translate(200%, 0);
   -moz-transform: translate(200%, 0);
   -ms-transform: translate(200%, 0);
@@ -1497,6 +1650,12 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
   -ms-transition: all 1500ms ease-out;
   -o-transition: all 1500ms ease-out;
   transition: all 1500ms ease-out;
+}
+@media (orientation: portrait) {
+  #heroBanner img {
+    height: 100%;
+    width: auto;
+  }
 }
 #heroBanner img.showing {
   -webkit-transform: translate(0, 0);
@@ -1622,8 +1781,7 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
 #homeSections section .bannerWrapper .imgWrapper img {
   height: 40em;
   height: 40vh;
-  min-width: 100%;
-  min-height: 100%;
+  z-index: 2;
 }
 @media (min-width: 640px) {
   #homeSections section .bannerWrapper {
@@ -1638,6 +1796,7 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
   position: absolute;
   left: 15px;
   bottom: 0;
+  z-index: 5;
   -webkit-transform: translate(0, 32%);
   -moz-transform: translate(0, 32%);
   -ms-transform: translate(0, 32%);
@@ -1794,21 +1953,23 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
   width: 100%;
   margin: 0;
   margin-bottom: 50px;
-}
-.gridWrapper .grid section > * {
   cursor: pointer;
+}
+.gridWrapper .grid section:hover .imgWrapper .overlay {
+  opacity: .4;
+  display: block;
 }
 .gridWrapper .grid section .imgWrapper {
   position: relative;
   overflow: hidden;
-  height: 50em;
-  height: 50vw;
+  height: 57em;
+  height: 57vw;
 }
-.gridWrapper .grid section .imgWrapper img {
-  min-width: 100%;
-  height: 100%;
-  min-height: 50em;
-  min-height: 50vw;
+@media (min-width: 640px) {
+  .gridWrapper .grid section .imgWrapper {
+    height: 50em;
+    height: 50vw;
+  }
 }
 .gridWrapper .grid section .imgWrapper .overlay {
   position: absolute;
@@ -1817,15 +1978,12 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
   width: 100%;
   height: 100%;
   opacity: 0;
+  z-index: 10;
   -webkit-transition: opacity 0.5s ease-out;
   -moz-transition: opacity 0.5s ease-out;
   -ms-transition: opacity 0.5s ease-out;
   -o-transition: opacity 0.5s ease-out;
   transition: opacity 0.5s ease-out;
-}
-.gridWrapper .grid section .imgWrapper .overlay.open {
-  opacity: .4;
-  display: block;
 }
 .gridWrapper .grid section h2 {
   float: left;
@@ -1959,6 +2117,8 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
   transition: opacity 0.25s ease-out;
   min-height: 90em;
   min-height: 90vw;
+  height: 100%;
+  width: auto;
 }
 .gridWrapper.teamWrapper .grid section .imgWrapper img:first-of-type {
   z-index: 150;
@@ -2095,6 +2255,7 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
 #projectLayout {
   position: relative;
   margin-left: 15px;
+  /*mobile version hack*/
 }
 @media (min-width: 640px) {
   #projectLayout {
@@ -2109,9 +2270,11 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
   min-height: 400px;
   overflow: hidden;
 }
-#projectLayout .featuredImage img {
-  min-height: 100%;
-  min-width: 100%;
+@media (orientation: portrait) {
+  #projectLayout .featuredImage img {
+    height: 100%;
+    width: auto;
+  }
 }
 #projectLayout .projectContent {
   font-size: 1.6em;
@@ -2264,6 +2427,19 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
 #projectLayout.caseStudy .projectContent .projectDetails .socialAccounts ul.socialButtons li:hover {
   background-color: #e6e6e6;
 }
+@media (max-width: 639px) {
+  #projectLayout.caseStudy .projectContent .projectDetails {
+    float: none;
+    margin-bottom: 50px;
+  }
+  #projectLayout.caseStudy .projectContent .projectDetails .projectInfo section {
+    width: 50%;
+    float: left;
+  }
+  #projectLayout.caseStudy .projectContent .projectBody {
+    padding-left: 0;
+  }
+}
 
 #projectImages {
   margin-bottom: 50px;
@@ -2322,10 +2498,6 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
   #projectImages section .imageWrapper .imageBox.halfImage {
     width: 50%;
   }
-}
-#projectImages section .imageWrapper .imageBox img {
-  min-width: 100%;
-  min-height: 100%;
 }
 
 .flexBox4, #readAbout, #relatedProjects {
@@ -2418,11 +2590,6 @@ nav#sectionNav ul li:nth-of-type(4):hover, nav#sectionNav ul li:nth-of-type(4).a
   height: 14vw;
   position: relative;
   overflow: hidden;
-}
-#relatedProjects section .imgWrapper img {
-  width: 100%;
-  min-height: 100%;
-  min-width: 100%;
 }
 #relatedProjects section .contentWrapper {
   margin-left: 15px;

@@ -144,7 +144,7 @@ app.factory('SiteLoader', function($http, $q, $rootScope){
         // Call for Site Data, when a promise
         'getRawData' : function(){
 
-            $rootScope.isLoading = true;
+            // $rootScope.isLoading = true; // @LOADER
 
             var deferred = $q.defer();
             // If some fucked up IE feature exists, use it
@@ -168,7 +168,6 @@ app.factory('SiteLoader', function($http, $q, $rootScope){
         // Parse raw site data into data tree to be used with App
         'getPosts' : function(rawData){
 
-            console.log('Parse data:');
             console.log(rawData);
 
             function ternValue(object, i) {
@@ -182,8 +181,20 @@ app.factory('SiteLoader', function($http, $q, $rootScope){
             function splitCSV(str) {
                 // Remove whitespace and split by ','
                 var arr = str.replace(/, /g,',').split(",");
+
+                // Remove empty pieces
+                for(var i = arr.length; i >= 0; i--) {
+                    if(arr[i] === ""){
+                        arr.splice(i, 1);
+                    }
+                }
+
                 return arr;
             };
+
+            function isPortrait(width, height){
+                return width < height;
+            }
 
             // Structure Site Posts object 
             function postTree(Site){
@@ -241,8 +252,11 @@ app.factory('SiteLoader', function($http, $q, $rootScope){
                                 var obj = {
                                     'url' : post.acf.banner_images[h].image.url,
                                     'alt' : ternValue(post.acf.banner_images[h].alt),
-                                    'order' : ternValue(post.acf.banner_images[h].arrangement)
+                                    'order' : ternValue(post.acf.banner_images[h].arrangement),
+                                    'position' : ternValue(post.acf.banner_images[h].positioning),
+                                    'isPortrait' : isPortrait(post.acf.banner_images[h].image.width, post.acf.banner_images[h].image.height)
                                 }
+
                                 temp.content.images.push(obj);
                                 tree.home.images.push(obj.url);
                             }
@@ -253,10 +267,12 @@ app.factory('SiteLoader', function($http, $q, $rootScope){
 
                         if (post.terms.category[0].slug == 'home-section' && tree.home.sections.length < 4) {
                             temp.content = {
-                                'image_id' : ternValue(post.acf.banner_image.id),
-                                'image_alt' : ternValue(post.acf.banner_image.alt),
-                                'image_url': ternValue(post.acf.banner_image.url),
-                                'image_caption' : ternValue(post.acf.banner_caption)
+                                'id' : ternValue(post.acf.banner_image.id),
+                                'alt' : ternValue(post.acf.banner_image.alt),
+                                'url': ternValue(post.acf.banner_image.url),
+                                'caption' : ternValue(post.acf.banner_caption),
+                                'position' : ternValue(post.acf.positioning),
+                                'isPortrait' : isPortrait(post.acf.banner_image.width, post.acf.banner_image.height)
                             };
 
                             tree.home.images.push(temp.content.image_url);
@@ -283,8 +299,8 @@ app.factory('SiteLoader', function($http, $q, $rootScope){
                             temp.content = {
                                 'case_study' : post.acf.case_study,
                                 'client' : ternValue(post.acf.client),
-                                'services' : ternValue(post.acf.services),
-                                'project' : ternValue(post.acf.project),
+                                'services' : ternValue(splitCSV(post.acf.services)),
+                                'project' : ternValue(splitCSV(post.acf.project)),
                                 'other_details' : ternValue(post.acf.other_details),
                                 'project_url' : ternValue(post.acf.project_url),
                                 'social_media' : ternValue(post.acf.social_media),
@@ -295,6 +311,10 @@ app.factory('SiteLoader', function($http, $q, $rootScope){
                                 'images' : []
                             };
 
+                            for ( var q = 0; temp.content.other_details.length > q; q++){
+                                temp.content.other_details[q].details = splitCSV(temp.content.other_details[q].details);
+                            }
+
                             // Get project images outside of repeater array                       
                             if (post.acf.images && post.acf.images.length) {
                                 for (var d = 0; post.acf.images.length > d; d++) {
@@ -304,13 +324,15 @@ app.factory('SiteLoader', function($http, $q, $rootScope){
                                         'label' : post.acf.images[d].label,
                                         'order' : post.acf.images[d].arrangement,
                                         'half' : post.acf.images[d].half,
+                                        'position' : ternValue(post.acf.images[d].positioning),
+                                        'isPortrait' : isPortrait(post.acf.images[d].image.width, post.acf.images[d].image.height)
                                     };
 
                                     // Skip first image (featured image)
                                     if (d > 0) { temp.content.image_sections.push(obj); }
                                     else { temp.content.featured_image = obj; }
 
-                                    temp.content.images.push(obj.url);
+                                    temp.content.images.push(obj);
                                 }
                             }
 
@@ -332,9 +354,13 @@ app.factory('SiteLoader', function($http, $q, $rootScope){
                         if (post.terms.category[0].slug == 'team-member') {
                             temp.content = {
                                 'position' : ternValue(post.acf.position),
+                                'accounts' : ternValue(post.acf.accounts),
                                 'featured_image' : (post.acf.profile_picture && post.acf.profile_picture.url) ? post.acf.profile_picture.url : null,
                                 'funny_picture' : (post.acf.funny_picture && post.acf.funny_picture.url) ? post.acf.funny_picture.url : null,
-                                'accounts' : ternValue(post.acf.accounts)
+                                'images' : {
+                                    'featured' : post.acf.profile_picture,
+                                    'funny'    : post.acf.funny_picture
+                                }
                             };
 
                             tree.team.images.push(temp.content.featured_image);
@@ -399,17 +425,20 @@ app.factory("Preloader", function( $q, $rootScope, $timeout, Storage ) {
     //////////////////////////////////////////////////////////////////////
 
     Preloader.preload = function( images ) {
-
+        return;  // @LOADER
         // Track whether css transition timing has had chance to finish
         //////////////////////////////////////////////////////////////////////
         var transitionComplete = false;
         var transitionTiming = 750; // CSS transition timing (500ms)
         $timeout(function(){ transitionComplete = true; }, transitionTiming);
 
-        function checkTransition() {
-            console.log('checking: ' + transitionComplete);
-            if (transitionComplete) { $rootScope.isLoading = false; }
-            else { $timeout(function(){ checkTransition(); }, 50); }
+        function checkTransition(wasSuccessful) {
+            if (transitionComplete) { 
+                $rootScope.isLoading = false;
+                $rootScope.isSuccessful = wasSuccessful;
+                $rootScope.$emit('$viewContentLoaded');
+
+            } else { $timeout(function(){ checkTransition(wasSuccessful); }, 50); }
         };
 
         if (images.length) {
@@ -425,18 +454,16 @@ app.factory("Preloader", function( $q, $rootScope, $timeout, Storage ) {
                 function handleResolve( imageLocations ) {
 
                     // Loading was successful.
-                    checkTransition();
-                    $rootScope.isSuccessful = true;
-                    $rootScope.$emit('$viewContentLoaded');
+                    checkTransition(true);
 
                     console.log('Preloading Complete');
                 },
                 function handleReject( imageLocation ) {
 
                     // Loading failed on at least one image.
-                    checkTransition();
-                    $rootScope.isSuccessful = false;
-                    $rootScope.$emit('$viewContentLoaded');
+                    checkTransition(false);
+
+                    console.log('Preloading Rejected');
 
                 },
                 function handleNotify( event ) {
@@ -759,20 +786,20 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
     };
 
     // AAAAARRRRRRGHGHGHGHGGHGH
-    // @BUG
-    function disableScroll(set){
-        if (set) {
-            dom.body.classList.add('hidden');
-            dom.body.addEventListener('touchmove', prevent, true);
-            // dom.mainNav.addEventListener('touchmove', stopProp);
-            $(dom.body).css('height', window.innerHeight+'px');
-        } else {
-            dom.body.classList.remove('hidden');
-            dom.body.removeEventListener('touchmove', prevent, true);
-            // dom.mainNav.removeEventListener('touchmove', stopProp);
-            $(dom.body).css('height', '');
-        }
-    };
+    // // @BUG
+    // function disableScroll(set){
+    //     if (set) {
+    //         dom.body.classList.add('hidden');
+    //         dom.body.addEventListener('touchmove', prevent, true);
+    //         // dom.mainNav.addEventListener('touchmove', stopProp);
+    //         $(dom.body).css('height', window.innerHeight+'px');
+    //     } else {
+    //         dom.body.classList.remove('hidden');
+    //         dom.body.removeEventListener('touchmove', prevent, true);
+    //         // dom.mainNav.removeEventListener('touchmove', stopProp);
+    //         $(dom.body).css('height', '');
+    //     }
+    // };
 
     // Object Menthods
     ////////////////////////////////////////////////////////////////
@@ -784,7 +811,7 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
 
         'reloadSite' : reloadSite,
 
-        'disableScroll' : disableScroll,
+        // 'disableScroll' : disableScroll,
 
         'anchorTo' : function(anchor) {
                 var elem = document.getElementById(anchor);
@@ -810,6 +837,7 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
             },
 
         'route' : function(route, turnOff, params) {
+
                 var params = params || {};
                 var menuOpen = dom.mainNav.classList.contains('menu-open');
                 this.toggleMenu(turnOff);
@@ -841,6 +869,13 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
                     'func': func,
                     'bub' : bub
                 });
+            },
+
+        'setPageTitle' : function(str) {
+                var headTitle = document.getElementsByTagName('title')[0];
+                str = str ? (' | ' + str) : '';
+                str = ' | Under Construction';
+                headTitle.innerHTML = 'Zago' + str;
             },
 
         'showScroll' : function() {
@@ -890,7 +925,6 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
                         dom.menuBtn.classList.remove('menu-open');
                         dom.content.classList.remove('menu-open');
                         dom.content.removeEventListener('click', close, true); // (bug) Doesn't remove until content area is actually clicked
-                        disableScroll(); console.log('toggle menu close');
                
                 };
 
@@ -900,7 +934,6 @@ app.factory("Functions", function( $q, $rootScope, $state, Preloader, Storage, $
                         dom.menuBtn.classList.add('menu-open');
                         dom.content.classList.add('menu-open');
                         dom.content.addEventListener('click', close, true);
-                        disableScroll(true); console.log('toggle menu open');
 
                         // If first time user opens menu, hide menuPrompt
                         if (!Storage.prompted) {
@@ -1085,7 +1118,7 @@ app.directive('grid', function($compile) {
             }
 
             var newSection = function(data){
-
+                console.log(data);
                 // Create Section element
                 var sec = document.createElement('section');
                 sec.setAttribute('data-id', data.id);
@@ -1095,10 +1128,21 @@ app.directive('grid', function($compile) {
                 // Create Img Element
                 var img = document.createElement('img');
                 img.setAttribute('ng-src', data.content.featured_image.url || data.content.featured_image); // @todo fix projects bug
+                // Check and Add class for portrait images
+                if (data.content.featured_image.isPortrait) { img.classList.add('isPortrait'); }
+                if (data.content.featured_image.position) { 
+                    var classes = data.content.featured_image.position;
+                    for (var pos = 0; classes.length > pos; pos++) {
+                        img.classList.add(classes[pos]);
+                    };
+                }
+
                 imgWrap.appendChild(img);
+                imgWrap.setAttribute('image-loader', true);
                 if (data.content.funny_picture) {
                     var img2 = document.createElement('img');
                     img2.setAttribute('ng-src', data.content.funny_picture);
+                    img.setAttribute('precision-image', true);
                     imgWrap.appendChild(img2);
                 }
                 // Create Overlay
@@ -1216,14 +1260,7 @@ app.directive('grid', function($compile) {
 
         function addEventListeners(scope){
             // Add a hover effect for the image overlay when img or headers are hovered over
-            $('.projectWrapper .grid section > *').hover(
-                function(){
-                    $(this.parentNode).children('.imgWrapper').children('.overlay').addClass('open');
-                },
-                function(){
-                    $(this.parentNode).children('.imgWrapper').children('.overlay').removeClass('open');
-                }
-            ).click(function(){
+            $('.projectWrapper .grid section > *').click(function(){
                 var project;
                 try {
                     project = this.parentNode.dataset.id;
@@ -1346,7 +1383,7 @@ app.directive('homeSections', function() {
     
     var linker = function(scope, element, attrs) {
         // scope.banner_caption.first = 
-        var words = scope.section.content.image_caption.trim().split(" ");
+        var words = scope.section.content.caption.trim().split(" ");
         var colors = ['blue', 'yellow', 'pink', 'green'];
 
         scope.caption = {
@@ -1378,15 +1415,123 @@ app.directive('underZ', function() {
     };
 });
 
+app.directive('projectNav', function(){
+
+    var linker = function($scope, element, attrs){
+
+    };
+
+    return {
+        restrict: 'A',
+        templateUrl: '../pieces/project_nav.html',
+        replace: true,
+        link : linker
+    }
+});
+
+app.directive('precisionImage', function(){
+
+    var linker = function($scope, element, attrs){
+        console.log(attrs.precisionImage);
+        if (attrs.precisionImage) {
+            var classes = JSON.parse(attrs.precisionImage);
+
+            for (var i = 0; classes.length > i; i++) {
+                element[0].classList.add(classes[i]);
+            };
+        }
+    };
+
+    return {
+        restrict: 'A',
+        link : linker,
+        scope: true
+    }
+});
+
+app.directive('imageLoader', function(){
+
+    var linker = function(scope, element, attrs){
+        var loader = document.createElement('div');
+        var wheel = document.createElement('div');
+        loader.setAttribute('class', 'loaderBox');
+        wheel.setAttribute('class', 'loader');
+        loader.appendChild(wheel);
+        element[0].appendChild(loader);
+        element[0].classList.add('loaderWrapper');
+    };
+
+    return {
+        restrict: 'A',
+        link: linker
+    }
+});
+
+app.directive('rotateImages', function($interval){
+    var linker = function($scope, element, attrs){
+
+        function getImages(){
+            var elems = element[0].children;
+
+            var images = [];
+            // Get IMG Tags
+            for (var r = 0; elems.length > r; r++) {
+                if (elems[r].tagName == 'IMG') {
+                    images.push(elems[r]);
+            }   }
+
+            return images;
+        };
+
+
+        function rotateImages(){
+            var images = getImages();
+            // @BUG This is acting funny, 95% working, but has some weird issues
+            // If img is last in array, set NEXT to first image, else set to next image in array
+            $scope.lastBanner = $scope.activeBanner;
+            $scope.activeBanner = ($scope.activeBanner + 1) % images.length;
+            console.log($scope.activeBanner);
+        };
+
+        var timer;
+        var waitTiming = 4000; // how long each slide remains active
+        $scope.setTimer = function(){
+            $scope.activeBanner = 0;
+            $scope.lastBanner;
+            // Set rotation interval
+            timer = $interval(rotateImages, waitTiming);
+        };
+
+        $scope.$watch(function(){ return element; }, function(){
+            $scope.setTimer();
+        });
+
+        $scope.$on('$destroy', function() {
+            // Clear old timers
+            $interval.cancel(timer);
+            $scope.timer = undefined;
+        });
+
+    };
+
+    return {
+        restrict: 'A',
+        link: linker
+    }
+
+
+});
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-app.controller('AppCtrl', function($scope, $rootScope, Functions, Storage){
+app.controller('AppCtrl', function($scope, $rootScope, $timeout, Functions, Storage){
 
     // App-general Functions
     ////////////////////////////////////////////////////////////////////////////////////
     $scope.route = Functions.route;
     $scope.toggleMenu = Functions.toggleMenu;
     $scope.viewProject = Functions.viewProject;
+    $scope.setPageTitle = Functions.setPageTitle;
     $scope.anchorTo = Functions.anchorTo;
     $scope.scrollTop = Functions.scrollTop;
     $scope.colors = ['#00ffff','#ffff00','#ff00ff','#00ff00'];
@@ -1416,26 +1561,21 @@ app.controller('AppCtrl', function($scope, $rootScope, Functions, Storage){
 app.controller('HomeCtrl', function($scope, $rootScope, $timeout, $interval, Functions, Preloader, Storage){
 
     $rootScope.pageView = "homePage";
+    $scope.setPageTitle();
 
     var posts = JSON.parse(Storage.site).home;
     $scope.hero = posts.banners[0];
     $scope.blurb = posts.blurb[0];
     $scope.sections = posts.sections;
 
-    Preloader.preload(posts.images);
-
-
     // Section Nav scrolling event listener & logic
     ////////////////////////////////////////////////////////////////////////////////////
-    var doneOnce;
     $rootScope.$on('$viewContentLoaded', function(){
-        // if Images have loaded, it IS the homepage, and the functions haven't been triggered once before
-        if (!$rootScope.isLoading && $rootScope.pageView == 'homePage' && !doneOnce) {
-            doneOnce = true;
+        // if it IS the homepage
+        if ($rootScope.pageView === "homePage") {
             try { // Workaround for $rootScope.$on checking on every view instead of just homePage
-                $scope.rotateHeros();
                 $timeout(function(){ setDimensions(); });
-                Functions.setListener(window, 'resize', Functions.throttle(setDimensions, 10));
+                Functions.setListener(  window, 'resize', Functions.throttle(setDimensions, 10));
                 Functions.setListener(window, 'scroll', Functions.throttle(pinMenu, 10)); }
             catch (error) { }
         }
@@ -1492,41 +1632,16 @@ app.controller('HomeCtrl', function($scope, $rootScope, $timeout, $interval, Fun
         });
     };
 
-    // Set Rotate of hero banner images
-    ////////////////////////////////////////////////////////////////////////////////////
-    $scope.activeBanner = 0;
-    $scope.lastBanner;
-
-    $scope.rotateHeros = function(){
-        var elems = document.getElementById('heroBanner').children;
-        var images = [];
-        // Get IMG Tags
-        for (var r = 0; elems.length > r; r++) {
-            if (elems[r].tagName == 'IMG') {
-                images.push(elems[r]);
-        }   }
-
-        var waitTiming = 4000; // how long each slide remains active
-
-        // Set rotation interval
-        $interval(function(){ // @BUG This is acting funny, 95% working, but has some weird issues
-            // If img is last in array, set NEXT to first image, else set to next image in array
-            $scope.lastBanner = $scope.activeBanner;
-            $scope.activeBanner = ($scope.activeBanner + 1) % images.length;
-        }, waitTiming);
-    };
-
 });
 
 app.controller('ProjectsCtrl', function($scope, $rootScope, Storage, Preloader, Styling){
 
     $rootScope.pageView = "projectsOverviewPage";
+    $scope.setPageTitle('Projects');
 
     var posts = JSON.parse(Storage.site).project;
     $scope.blurb = posts.blurb[0];
     $scope.projects = posts.projects;
-
-    Preloader.preload(posts.images);
 
     (function randomizeHoverColors(){
         colors = $scope.colors.shuffle();
@@ -1580,7 +1695,7 @@ app.controller('ProjectDetailCtrl', function($scope, $rootScope, $stateParams, S
     // If project exists, extract image urls and preload images
     if ($scope.project) {
 
-        Preloader.preload($scope.project.content.images);
+        $scope.setPageTitle($scope.project.title);
 
         var sections = $scope.project.content.image_sections;
 
@@ -1588,13 +1703,14 @@ app.controller('ProjectDetailCtrl', function($scope, $rootScope, $stateParams, S
         ///////////////////////////////////////////////////////
         $scope.imageSections = [];
         for (var o = 0; sections.length > o; o++) {
-
             var temp = {
                 'label' : sections[o].label,
                 'order' : sections[o].order,
                 'images' : [{
                     'url' : sections[o].url,
-                    'alt' : sections[o].alt
+                    'alt' : sections[o].alt,
+                    'position' : sections[o].position,
+                    'isPortrait' : sections[o].isPortrait
                 }]
             };
 
@@ -1604,7 +1720,9 @@ app.controller('ProjectDetailCtrl', function($scope, $rootScope, $stateParams, S
                 o++;
                 temp.images.push({
                     'url' : sections[o].url,
-                    'alt' : sections[o].alt
+                    'alt' : sections[o].alt,
+                    'position' : sections[o].position,
+                    'isPortrait' : sections[o].isPortrait
                 });
             }
 
@@ -1612,23 +1730,20 @@ app.controller('ProjectDetailCtrl', function($scope, $rootScope, $stateParams, S
         };
 
 
-        ///////////////////////////////////////////////////////
-    // Else redirect back to projects overview page
+    ///////////////////////////////////////////////////////
+    // Else redirect back to projects overview page if project doesn't exist
     } else { $scope.route('projects', true); }
-    
-    console.log($scope.project);
 
 });
 
 app.controller('TeamCtrl', function($scope, $rootScope, Functions, Preloader, Storage){
 
     $rootScope.pageView = "teamPage";
+    $scope.setPageTitle('The Team');
 
     var posts = JSON.parse(Storage.site).team;
     $scope.blurb = posts.blurb[0];
     $scope.members = posts.members.shuffle();
-
-    Preloader.preload(posts.images);
 
 });
 
@@ -1644,7 +1759,7 @@ app.controller('ErrorCtrl', function($scope, $rootScope, $state, Storage){
 
 app.controller('LegacyCtrl', function($scope, $rootScope, $state, Functions, Storage){
 
-    console.log('Implementing Legacy browser notice');
+    $scope.setPageTitle('Outdated Browser');
 
     // Set Notice Height to Window Height, monitor resize event
     function setBodyHeight(){

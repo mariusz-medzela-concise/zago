@@ -77,6 +77,21 @@
     left: -9999px;
     right: -9999px;
     margin: auto;
+    min-height: 100%;
+    min-width: 100%;
+    width: 100%;
+    &.top {
+    	top: 0;
+	    bottom: initial; }
+    &.bottom {
+    	bottom: 0;
+	    top: initial; }
+    &.left {
+    	left: 0;
+    	right: initial; }
+    &.right {
+    	right: 0;
+    	left: initial; }
 }
 
 /*************************************************/
@@ -126,64 +141,35 @@ ul {
 				height: 100%; }
 			&:hover {
 				background-color: $grey; }
-			&.invert {
-				background-color: transparent;
-				&.invertHover:hover {
-					background-color: white; } }
-			&.fb_btn {
-				background-position: 72% -1.5%;
-				&.invert {
-					background-position: 72% 5%;
-					&.invertHover:hover {
-						background-position: 72% -1.5%;; } } }
-			&.tw_btn {
-				background-position: 50% 11.25%;
-				&.invert {
-					background-position: 50% 17.25%;
-					&.invertHover:hover {
-						background-position: 50% 11.25%; } } }
-			&.li_btn {
-				background-position: 50% 23.5%;
-				&.invert {
-					background-position: 50% 29.75%;
-					&.invertHover:hover {
-						background-position: 50% 23.5%; } } }
-			&.pi_btn {
-				background-position: 60% 36%;
-				&.invert {
-					background-position: 60% 36%;
-					&.invertHover:hover {
-						background-position: 60% 36%; } } }
-			&.be_btn {
-				background-position: 50% 48.25%;
-				&.invert {
-					background-position: 50% 48.25%;
-					&.invertHover:hover {
-						background-position: 50% 48.25%; } } }
-			&.ma_btn {
-				background-position: 50% 59.5%;
-				&.invert {
-					background-position: 50% 65%;
-					&.invertHover:hover {
-						background-position: 50% 59.5%; } } }
-			&.tr_btn {
-				background-position: 60% 71.25%;
-				&.invert {
-					background-position: 60% 71.25%;
-					&.invertHover:hover {
-						background-position: 60% 71.25%; } } }
-			&.yt_btn {
-				background-position: 50% 83.75%;
-				&.invert {
-					background-position: 50% 83.75%;
-					&.invertHover:hover {
-						background-position: 50% 83.75%; } } }
-			&.ot_btn {
-				background-position: 50% 95.25%;
-				&.invert {
-					background-position: 50% 95.25%;
-					&.invertHover:hover {
-						background-position: 50% 95.25%; } } }
+			&.invert { background-color: transparent;
+				&.invertHover:hover { background-color: white; } }
+			&.fb_btn { background-position: 72% -1.5%;
+				&.invert { background-position: 72% 5%;
+					&.invertHover:hover { background-position: 72% -1.5%;; } } }
+			&.tw_btn { background-position: 50% 11.25%;
+				&.invert { background-position: 50% 17.25%;
+					&.invertHover:hover { background-position: 50% 11.25%; } } }
+			&.li_btn { background-position: 50% 23.5%;
+				&.invert { background-position: 50% 29.75%;
+					&.invertHover:hover { background-position: 50% 23.5%; } } }
+			&.pi_btn { background-position: 60% 36%;
+				&.invert { background-position: 60% 36%;
+					&.invertHover:hover { background-position: 60% 36%; } } }
+			&.be_btn { background-position: 50% 48.25%;
+				&.invert { background-position: 50% 48.25%;
+					&.invertHover:hover { background-position: 50% 48.25%; } } }
+			&.ma_btn { background-position: 50% 59.5%;
+				&.invert { background-position: 50% 65%;
+					&.invertHover:hover { background-position: 50% 59.5%; } } }
+			&.tr_btn { background-position: 60% 71.25%;
+				&.invert { background-position: 60% 71.25%;
+					&.invertHover:hover { background-position: 60% 71.25%; } } }
+			&.yt_btn { background-position: 50% 83.75%;
+				&.invert { background-position: 50% 83.75%;
+					&.invertHover:hover { background-position: 50% 83.75%; } } }
+			&.ot_btn { background-position: 50% 95.25%;
+				&.invert { background-position: 50% 95.25%;
+					&.invertHover:hover { background-position: 50% 95.25%; } } }
 		}
 	}
 }
@@ -244,6 +230,8 @@ footer {
 		width: 48%;
 		padding-right: 2%;
 		margin-bottom: 30px;
+		&.collaboration {
+			display: none; }
 		@include breakpoint(smallTablet) {
 			width: 24%;
 			padding-right: 1%;
@@ -260,7 +248,7 @@ footer {
 			&:hover {
 				text-decoration: underline;
 				color: black; } }
-		&.info, &.intern {
+		&.intern {
 			p {
 				display: inline;
 				white-space: pre-line;
@@ -319,16 +307,24 @@ footer {
 				padding-right: 0;
 				font-size: 1.2em;
 				margin-bottom: 35px;
+				&.collaboration {
+					display: block;
+					p {
+						line-height: 1.5;
+						letter-spacing: .075;
+						text-transform: uppercase;
+						font-family: 'Black';
+						a {
+							text-decoration: underline; } } }
 				@include breakpoint(smallTablet) {
 					width: 33%;
-					&.info, &.intern, &.social {
+					&.collaboration, &.intern, &.social {
 						width: 100%; } }
 				@include breakpoint(large) {
 					width: 25%; }
-				&.info, &.intern {
+				&.collaboration, &.intern {
 					display: block;
-					width: 100%;  }
-				&.intern {
+					width: 100%;
 					p {
 						white-space: normal; } }
 				&.social {
@@ -352,7 +348,7 @@ footer {
 				section {
 					font-size: 2em;
 					margin-bottom: 75px;
-					&.info, &.intern {
+					&.intern {
 						 } } } }
 	&.lovePage {
 		display: none; }
@@ -382,6 +378,8 @@ footer {
 
 #pageContent {
 	width: 100%;
+	min-height: 100em;
+	min-height: 100vh;
 	overflow: auto;
 	position: relative;
 	&.menu-open {
@@ -399,6 +397,48 @@ footer {
 	z-index: 0;
 }
 
+.loaderWrapper {
+	background-color: $grey !important;
+	position: relative !important;
+	z-index: 1 !important;
+	img {
+		z-index: 5;
+	}
+}
+
+.loaderBox {
+	position: absolute;
+	top: 50%; left: 50%;
+	z-index: 0;
+	width: 100px;
+	height: 100px;
+	@include translate(-50%, -50%);
+	.loader {
+		border: 1em solid rgba(255, 255, 255, 0.2);
+		border-left: 1em solid #ffffff;
+		-webkit-animation: load8 1s infinite linear;
+		animation: load8 1s infinite linear;
+		&, &:after {
+			position: absolute;
+			top: -1em; left: -1em;
+			border-radius: 50%;
+			width: 100%;
+			height: 100%;
+		}
+	}
+}
+
+@include keyframes(load8){
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
 .beaconWrapper {
 	position: relative;
 	height: 100%;
@@ -408,6 +448,8 @@ footer {
 		height: 150px;
 		line-height: 150px;
 		@extend .absoluteCenter;
+		min-width: initial;
+		min-height: initial;
 		&:before, &:after {
 			opacity: 0;
 			box-sizing: border-box;
@@ -510,8 +552,8 @@ img.siteID {
 }
 
 p#menuPrompt {
-	position: relative;
-	bottom: 25px; right: 50%;
+	position: absolute;
+	bottom: 180%; right: 50%;
 	@include translate(50%);
 	z-index: 500;
 	color: white;
@@ -609,7 +651,7 @@ nav {
 		#menuWrapper {
 			@include clearfix;
 			margin: 0 auto;
-			padding: 150px 0 25vh;
+			padding: 20vmin 0 25vmin;
 			position: relative;
 			z-index: 800;
 			#menu {
@@ -624,12 +666,15 @@ nav {
 						&:last-of-type {
 							margin-bottom: 0; }
 						a {
-							font-size: 4.8em;
+							font-size: 12vmin;
 							letter-spacing: .075em;
 							font-weight: 600;
 							text-transform: uppercase;
 							position: relative;
 							text-decoration: none; }
+						@include breakpoint(smallTablet){
+							a {
+								font-size: 4.8em; } }
 						@include breakpoint(wide) {
 							margin-bottom: 1.8em; 
 							margin-bottom: 1.8vw;
@@ -638,7 +683,6 @@ nav {
 								font-size: 3.25vw; } } } }
 				@include breakpoint(mobile) {
 					margin: 0 70px; } }
-			
 			@include breakheight(tiny) {
 				padding-bottom: 30vh;  }
 			@include breakpoint(smallTablet) {
@@ -646,13 +690,28 @@ nav {
 			@include breakpoint(desktop) {
 				padding-top: 25vh;
 				padding-bottom: 50px !important; }
+			// Landscape Styling for mobile
+			@media(max-width: 639px) and (orientation : landscape) {
+				display: block;
+				ul {
+					li {
+						float: left;
+						width: 50%;
+						margin: 0 0 20vmin !important;
+						a {
+							font-size: 10vmax !important;
+						}
+					}
+				}
+			}
 		}
 	}
 	&#projectNav {
 		position: fixed;
 		z-index: 800;
 		backface-visibility: hidden;
-		top: 50%; left: 0;
+		top: 50%;
+		top: 50vh; left: 0;
 		/*@include translate(0, -50%);*/
 		width: 50px;
 		ul {
@@ -679,25 +738,26 @@ nav {
 					border: 1px solid $darkgrey;
 					background-color: white;
 					border-left: 0px;
-					padding: 10px;
 					height: 30px;
-					width: 200px;
+					width: 0px;
 					z-index: 500;
-					max-width: 0;
 					opacity: 0;
 					overflow: hidden;
-					@include transition(all);
+					cursor: pointer;
+					white-space: nowrap;
+					@include transition(width);
 					h5 {
 						width: 200px;
-						font-size: 2em; } }
+						font-size: 2em;
+						line-height: 1.75;
+                overflow: hidden;
+                text-overflow: ellipsis; } }
 				&:hover {
 					background-color: $grey;
 					.navTitle {
-						max-width: 200px;
-						opacity: 1;
-						h5 {
-							
-							} } } } }
+						padding: 10px;
+						width: 200px;
+						opacity: 1; } } } }
 		@include breakpoint(639px, true) {
 			top: 0;
 			right: 0;
@@ -790,9 +850,6 @@ nav {
 					color: white; } } }
 		&.info {
 			margin-bottom: 0px;
-			p {
-				display: none;
-			}
 			a { /* info@zagollc */
 				&:hover {
 					text-decoration: underline; } } } } }
@@ -912,10 +969,11 @@ nav {
 	img {
 		@extend .absoluteCenter;
 		z-index: 150;
-		min-height: 100%;
-		min-width: 100%;
 		@include translate(200%);
 		@include transition(all, 1500ms);
+		@media (orientation : portrait) {
+			height: 100%;
+			width: auto; }
 		&.showing {
 			@include translate(0);
 			z-index: 200; }
@@ -1008,8 +1066,7 @@ nav {
 				    @extend .absoluteCenter;
 				    height: 40em;
 				    height: 40vh;
-				    min-width: 100%;
-				    min-height: 100%; } }
+				    z-index: 2; } }
 			@include breakpoint(smallTablet) {
 				height: 50em;
 				height: 50vh;
@@ -1019,6 +1076,7 @@ nav {
 			.captionWrapper {
 				position: absolute;
 				left: 15px; bottom: 0;
+				z-index: 5;
 				@include translate(0, 32%);
 				p {
 					font-family: 'Black';
@@ -1125,29 +1183,29 @@ nav {
 			width: 100%;
 			margin: 0;
 			margin-bottom: 50px;
-			& > * {
-				cursor: pointer; }
+			cursor: pointer;
+			&:hover {
+				.imgWrapper {
+					.overlay {
+						opacity: .4;
+						display: block; } } }
 			.imgWrapper {
 				position: relative;
 				overflow: hidden;
-				height: 50em;
-				height: 50vw;
-				img {
-				    @extend .absoluteCenter;
-					min-width: 100%;
+				height: 57em;
+				height: 57vw;
+				@include breakpoint(smallTablet) {
+					height: 50em;
+					height: 50vw; }
+				img { @extend .absoluteCenter; }
+				.overlay {
+					position: absolute;
+					top: 0; left: 0;
+					width: 100%;
 					height: 100%;
-					min-height: 50em;
-					min-height: 50vw; }
-					.overlay {
-						position: absolute;
-						top: 0; left: 0;
-						width: 100%;
-						height: 100%;
-						opacity: 0;
-						@include transition(opacity);
-						&.open {
-							opacity: .4;
-							display: block; } } }
+					opacity: 0;
+					z-index: 10;
+					@include transition(opacity); } }
 			h2 {
 				float: left;
 				margin: 0px 3px;
@@ -1255,6 +1313,8 @@ nav {
 						@include transition(opacity, .25s);
 						min-height: 90em;
 						min-height: 90vw;
+						height: 100%;
+						width: auto;
 						&:first-of-type {
 							z-index: 150; } }
 					ul.socialButtons {
@@ -1358,10 +1418,10 @@ nav {
 		height: 100vh;
 		min-height: 400px;
 		overflow: hidden;
-		img {
-			@extend .absoluteCenter;
-			min-height: 100%;
-			min-width: 100%; } }
+		img { @extend .absoluteCenter;
+			@media (orientation : portrait) {
+				height: 100%;
+				width: auto; } } }
 	.projectContent {
 		font-size: 1.6em;
 		line-height: 1.5em;
@@ -1463,12 +1523,26 @@ nav {
 			}
 		}
 	}
-	@include breakpoint(mobile) {
-		 }
+	/*mobile version hack*/
+	@include breakpoint(639px, true) {
+		&.caseStudy {
+			.projectContent { 
+				.projectDetails {
+					float: none;
+					margin-bottom: 50px;
+					.projectInfo {
+						section {
+							width: 50%;
+							float: left; } } }
+				.projectBody {
+					padding-left: 0; }
+			}
+		}
+	}
 	@include breakpoint(smallTablet) {
-		 }
+	}
 	@include breakpoint(tablet) {
-		 }
+	}
 }
 
 #projectImages {
@@ -1502,10 +1576,7 @@ nav {
 					width: 100%;
 					@include breakpoint(smallTablet) {
 						width: 50%; } }
-				img {
-					@extend .absoluteCenter;
-					min-width: 100%;
-					min-height: 100%; } } } }
+				img { @extend .absoluteCenter; } } } }
 }
 
 .flexBox4 {
@@ -1580,11 +1651,7 @@ nav {
 			height: 14vw;
 			position: relative;
 			overflow: hidden;
-			img {
-				width: 100%;
-				min-height: 100%;
-				min-width: 100%;
-				@extend .absoluteCenter; } }
+			img { @extend .absoluteCenter; } }
 		.contentWrapper {
 			margin-left: 15px;
 			p {

@@ -1,21 +1,8 @@
-<nav id="projectNav">
-	<ul>
-		<li ng-click="viewProject(nextProject.id)">
-			<div class="navTitle">
-				<h5>{{nextProject.content.client}}</h5>
-			</div>
-		</li>
-		<li ng-click="viewProject(prevProject.id)">
-			<div class="navTitle">
-				<h5>{{prevProject.content.client}}</h5>
-			</div>
-		</li>
-	</ul>
-</nav>
+<div project-nav></div>
 
 <div id="projectLayout" ng-class="{caseStudy: project.content.case_study}">
-	<div class="featuredImage">
-		<img ng-src="{{project.content.featured_image.url}}" alt="{{project.content.featured_image.alt}}">
+	<div class="featuredImage" image-loader>
+		<img ng-src="{{project.content.featured_image.url}}" alt="{{project.content.featured_image.alt}}" ng-class="{isPortrait: project.content.featured_image.isPortrait}" precision-image="{{project.content.featured_image.position}}">
 	</div>
 	<div class="projectContent">
 		<h1 ng-bind-html="project.title" ng-if="project.content.case_study"></h1>
@@ -27,15 +14,15 @@
 				</section>
 				<section ng-if="project.content.project">
 					<h2>Project</h2>
-					<p>{{project.content.project}}</p>
+					<p ng-repeat="bodyText in project.content.project">{{bodyText}}</p>
 				</section>
 				<section ng-if="project.content.services">
 					<h2>Services</h2>
-					<p>{{project.content.services}}</p>
+					<p ng-repeat="bodyText in project.content.services">{{bodyText}}</p>
 				</section>
 				<section ng-repeat="detail in project.content.other_details">
 					<h2>{{detail.title}}</h2>
-					<p>{{detail.details}}</p>
+					<p ng-repeat="bodyText in detail.details">{{bodyText}}</p>
 				</section>
 			</div>
 			<a class="clientSite" href="{{project.content.url}}">Visit Website</a>
@@ -67,8 +54,8 @@
 	<section ng-repeat="section in imageSections">
 		<h6>{{section.label}}</h6>
 		<div class="imageWrapper">
-			<div ng-repeat="image in section.images" class="imageBox" ng-class="{halfImage: section.images.length > 1}">
-				<img ng-src="{{image.url}}" alt="{{image.alt}}">
+			<div ng-repeat="image in section.images" class="imageBox" ng-class="{halfImage: section.images.length > 1}" image-loader>
+				<img ng-src="{{image.url}}" alt="{{image.alt}}" ng-class="{isPortrait: image.isPortrait}" precision-image="{{image.position}}">
 			</div>
 		</div>
 	</section>
@@ -87,8 +74,8 @@
 <div id="relatedProjects" ng-if="project.content.case_study && project.content.related_projects.length">
 	<h3>Related Projects</h3>
 	<section ng-repeat="related in project.content.related_projects" ng-click="viewProject(related.id)">
-		<div class="imgWrapper">
-			<img ng-src="{{related.image.url}}" alt="{{related.image.alt}}">
+		<div class="imgWrapper" image-loader>
+			<img ng-src="{{related.image.url}}" alt="{{related.image.alt}}" ng-class="{isPortrait: related.image.isPortrait}" precision-image="{{related.image.position}}">
 		</div>
 		<div class="contentWrapper">
 			<p>{{related.title}}</p>
