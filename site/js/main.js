@@ -192,8 +192,8 @@ app.factory('SiteLoader', function($http, $q, $rootScope){
                 return arr;
             };
 
-            function isPortrait(width, height){
-                return width < height;
+            function aspectRatio(width, height){
+                return (height / width);
             }
 
             // Structure Site Posts object 
@@ -254,7 +254,7 @@ app.factory('SiteLoader', function($http, $q, $rootScope){
                                     'alt' : ternValue(post.acf.banner_images[h].alt),
                                     'order' : ternValue(post.acf.banner_images[h].arrangement),
                                     'position' : ternValue(post.acf.banner_images[h].positioning),
-                                    'isPortrait' : isPortrait(post.acf.banner_images[h].image.width, post.acf.banner_images[h].image.height)
+                                    'aspectRatio' : aspectRatio(post.acf.banner_images[h].image.width, post.acf.banner_images[h].image.height)
                                 }
 
                                 temp.content.images.push(obj);
@@ -272,7 +272,7 @@ app.factory('SiteLoader', function($http, $q, $rootScope){
                                 'url': ternValue(post.acf.banner_image.url),
                                 'caption' : ternValue(post.acf.banner_caption),
                                 'position' : ternValue(post.acf.positioning),
-                                'isPortrait' : isPortrait(post.acf.banner_image.width, post.acf.banner_image.height)
+                                'aspectRatio' : aspectRatio(post.acf.banner_image.width, post.acf.banner_image.height)
                             };
 
                             tree.home.images.push(temp.content.image_url);
@@ -325,7 +325,7 @@ app.factory('SiteLoader', function($http, $q, $rootScope){
                                         'order' : post.acf.images[d].arrangement,
                                         'half' : post.acf.images[d].half,
                                         'position' : ternValue(post.acf.images[d].positioning),
-                                        'isPortrait' : isPortrait(post.acf.images[d].image.width, post.acf.images[d].image.height)
+                                        'aspectRatio' : aspectRatio(post.acf.images[d].image.width, post.acf.images[d].image.height)
                                     };
 
                                     // Skip first image (featured image)
@@ -1129,7 +1129,8 @@ app.directive('grid', function($compile) {
                 var img = document.createElement('img');
                 img.setAttribute('ng-src', data.content.featured_image.url || data.content.featured_image); // @todo fix projects bug
                 // Check and Add class for portrait images
-                if (data.content.featured_image.isPortrait) { img.classList.add('isPortrait'); }
+                img.setAttribute('precision-image', true);
+                if (data.content.featured_image.aspectRatio) { img.setAttribute('aspect-ratio', data.content.featured_image.aspectRatio); }
                 if (data.content.featured_image.position) { 
                     var classes = data.content.featured_image.position;
                     for (var pos = 0; classes.length > pos; pos++) {
@@ -1429,17 +1430,34 @@ app.directive('projectNav', function(){
     }
 });
 
-app.directive('precisionImage', function(){
+app.directive('precisionImage', function($timeout, Functions){
 
     var linker = function($scope, element, attrs){
-        console.log(attrs.precisionImage);
+        // Add Custom Image Positioning classes
         if (attrs.precisionImage) {
             var classes = JSON.parse(attrs.precisionImage);
-
             for (var i = 0; classes.length > i; i++) {
                 element[0].classList.add(classes[i]);
             };
         }
+
+        var image = element[0];
+        var wrapper = image.parentNode;
+
+        function checkRatio(){
+            if (attrs.aspectRatio / (wrapper.clientHeight / wrapper.clientWidth) > 1) {
+                image.classList.add('stretch');
+            } else { image.classList.remove('stretch'); }
+        };
+
+        var listener = window.addEventListener('resize', Functions.throttle(checkRatio, 100));
+
+        $timeout(checkRatio);
+
+        $scope.$on('$destroy', function(){
+            window.removeEventListener('resize', Functions.throttle(checkRatio, 100));
+        });
+
     };
 
     return {
@@ -1710,7 +1728,7 @@ app.controller('ProjectDetailCtrl', function($scope, $rootScope, $stateParams, S
                     'url' : sections[o].url,
                     'alt' : sections[o].alt,
                     'position' : sections[o].position,
-                    'isPortrait' : sections[o].isPortrait
+                    'aspectRatio' : sections[o].aspectRatio
                 }]
             };
 
@@ -1722,7 +1740,7 @@ app.controller('ProjectDetailCtrl', function($scope, $rootScope, $stateParams, S
                     'url' : sections[o].url,
                     'alt' : sections[o].alt,
                     'position' : sections[o].position,
-                    'isPortrait' : sections[o].isPortrait
+                    'aspectRatio' : sections[o].aspectRatio
                 });
             }
 

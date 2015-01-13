@@ -2,7 +2,7 @@
 
 <div id="projectLayout" ng-class="{caseStudy: project.content.case_study}">
 	<div class="featuredImage" image-loader>
-		<img ng-src="{{project.content.featured_image.url}}" alt="{{project.content.featured_image.alt}}" ng-class="{isPortrait: project.content.featured_image.isPortrait}" precision-image="{{project.content.featured_image.position}}">
+		<img ng-src="{{project.content.featured_image.url}}" alt="{{project.content.featured_image.alt}}" ng-class="{isPortrait: project.content.featured_image.isPortrait}" precision-image="{{project.content.featured_image.position}}" aspect-ratio="{{project.content.featured_image.aspectRatio}}">
 	</div>
 	<div class="projectContent">
 		<h1 ng-bind-html="project.title" ng-if="project.content.case_study"></h1>
@@ -55,7 +55,7 @@
 		<h6>{{section.label}}</h6>
 		<div class="imageWrapper">
 			<div ng-repeat="image in section.images" class="imageBox" ng-class="{halfImage: section.images.length > 1}" image-loader>
-				<img ng-src="{{image.url}}" alt="{{image.alt}}" ng-class="{isPortrait: image.isPortrait}" precision-image="{{image.position}}">
+				<img ng-src="{{image.url}}" alt="{{image.alt}}" ng-class="{isPortrait: image.isPortrait}" precision-image="{{image.position}}" aspect-ratio="{{image.aspectRatio}}">
 			</div>
 		</div>
 	</section>
@@ -75,7 +75,7 @@
 	<h3>Related Projects</h3>
 	<section ng-repeat="related in project.content.related_projects" ng-click="viewProject(related.id)">
 		<div class="imgWrapper" image-loader>
-			<img ng-src="{{related.image.url}}" alt="{{related.image.alt}}" ng-class="{isPortrait: related.image.isPortrait}" precision-image="{{related.image.position}}">
+			<img ng-src="{{related.image.url}}" alt="{{related.image.alt}}" ng-class="{isPortrait: related.image.isPortrait}" precision-image="{{related.image.position}}" aspect-ratio="{{related.image.aspectRatio}}">
 		</div>
 		<div class="contentWrapper">
 			<p>{{related.title}}</p>

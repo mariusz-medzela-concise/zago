@@ -152,7 +152,7 @@ article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, 
   margin: auto;
   min-height: 100%;
   min-width: 100%;
-  width: 100%;
+  height: 100%;
 }
 .absoluteCenter.top, .beaconWrapper .top.beacon, #heroBanner img.top, #homeSections section .bannerWrapper .imgWrapper img.top, .gridWrapper .grid section .imgWrapper img.top, #projectLayout .featuredImage img.top, #projectImages section .imageWrapper .imageBox img.top, #relatedProjects section .imgWrapper img.top {
   top: 0;
@@ -169,6 +169,10 @@ article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, 
 .absoluteCenter.right, .beaconWrapper .right.beacon, #heroBanner img.right, #homeSections section .bannerWrapper .imgWrapper img.right, .gridWrapper .grid section .imgWrapper img.right, #projectLayout .featuredImage img.right, #projectImages section .imageWrapper .imageBox img.right, #relatedProjects section .imgWrapper img.right {
   right: 0;
   left: initial;
+}
+.absoluteCenter.stretch, .beaconWrapper .stretch.beacon, #heroBanner img.stretch, #homeSections section .bannerWrapper .imgWrapper img.stretch, .gridWrapper .grid section .imgWrapper img.stretch, #projectLayout .featuredImage img.stretch, #projectImages section .imageWrapper .imageBox img.stretch, #relatedProjects section .imgWrapper img.stretch {
+  width: 100%;
+  height: auto;
 }
 
 /*************************************************/
@@ -1311,6 +1315,20 @@ nav#projectNav ul li:last-of-type {
   background-position: 17px -130px;
   border-top: 0;
 }
+@media (min-width: 2200px) {
+  nav#projectNav ul li {
+    height: 70px;
+    width: 70px;
+    background-size: 35px auto;
+  }
+  nav#projectNav ul li:first-of-type {
+    background-position: 27px -315px;
+  }
+  nav#projectNav ul li:last-of-type {
+    background-position: 24px -190px;
+    border-top: 0;
+  }
+}
 nav#projectNav ul li .navTitle {
   position: absolute;
   top: -1px;
@@ -1319,7 +1337,7 @@ nav#projectNav ul li .navTitle {
   border: 1px solid #040707;
   background-color: white;
   border-left: 0px;
-  height: 30px;
+  height: 100%;
   width: 0px;
   z-index: 500;
   opacity: 0;
@@ -1343,8 +1361,8 @@ nav#projectNav ul li:hover {
   background-color: #e6e6e6;
 }
 nav#projectNav ul li:hover .navTitle {
-  padding: 10px;
   width: 200px;
+  padding: 0 10px;
   opacity: 1;
 }
 @media (max-width: 639px) {
