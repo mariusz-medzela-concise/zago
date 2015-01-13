@@ -1,6 +1,6 @@
 <div class="bannerWrapper">
 	<div class="imgWrapper" image-loader>
-		<img ng-src="{{section.content.url}}" ng-class="{isPortrait: section.content.isPortrait}">
+		<img ng-src="{{section.content.url}}" precision-image aspect-ratio="{{section.content.aspectRatio}}">
 	</div>
 	<div class="captionWrapper">
 		<p><span class="color" ng-class="caption.color">{{caption.first}}</span></p>
