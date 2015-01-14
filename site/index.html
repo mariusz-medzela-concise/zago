@@ -11,21 +11,48 @@
     <title>Zago | Under Construction</title>
     <link rel="icon" type="image/png" href="images/favicon.ico">
     <link rel="stylesheet" href="css/style.css" />
-    <script src="js/enhance.js"></script> <!-- Custom javaScript prototype functions -->
-    <script src="js/polyfills.js"></script> <!-- shims for legacy browsers -->
-    <script src="js/modernizr.js"></script> <!-- Library to test and detect browser compatability -->
-    <script src="js/mobile-detect.min.js"></script> <!-- library to detect whether "true" mobile/touch device -->
-    <script src="js/mobile-detect-modernizr.js"></script> <!-- modernizr & mobile-detect integration -->
-    <script src="js/modernizr-script.js"></script> <!-- Custom modernizr code logic -->
-    <script type="text/javascript" src="js/overthrow.min.js"></script> <!-- Mobile touch scrolling plugin -->
-    <script src="js/jquery-1.8.3.min.js"></script>
+    <script src="js/lib/enhance.js"></script> <!-- Custom javaScript prototype functions -->
+    <script src="js/lib/polyfills.js"></script> <!-- shims for legacy browsers -->
+    <script src="js/lib/modernizr.js"></script> <!-- Library to test and detect browser compatability -->
+    <script src="js/lib/mobile-detect.min.js"></script> <!-- library to detect whether "true" mobile/touch device -->
+    <script src="js/lib/mobile-detect-modernizr.js"></script> <!-- modernizr & mobile-detect integration -->
+    <script src="js/lib/modernizr-script.js"></script> <!-- Custom modernizr code logic -->
+    <script type="text/javascript" src="js/lib/overthrow.min.js"></script> <!-- Mobile touch scrolling plugin -->
+    <script src="js/lib/jquery-1.8.3.min.js"></script>
     <!-- Application Files -->
-    <script src="js/angular.min.js"></script>
-    <script src="js/angular-ui-router.min.js"></script>
-    <script src="js/angular-sanitize.min.js"></script>
-    <script src="js/angular-scroll.min.js"></script> 
+    <script src="js/lib/angular.min.js"></script>
+    <script src="js/lib/angular-ui-router.min.js"></script>
+    <script src="js/lib/angular-sanitize.min.js"></script>
+    <script src="js/lib/angular-scroll.min.js"></script>
+
     <script src="js/main.js"></script> <!-- Angular Application -->
     <script src="js/templates.js"></script> <!-- Template caching -->
+
+    <script src="js/services/Storage.js"></script>
+    <script src="js/services/SiteLoader.js"></script>
+    <script src="js/services/Styling.js"></script>
+    <script src="js/services/Preloader.js"></script>
+    <script src="js/services/Functions.js"></script>
+
+    <script src="js/directives/grid.js"></script>
+    <script src="js/directives/officeList.js"></script>
+    <script src="js/directives/socialButtons.js"></script>
+    <script src="js/directives/homeSections.js"></script>
+    <script src="js/directives/underZ.js"></script>
+    <script src="js/directives/projectNav.js"></script>
+    <script src="js/directives/precisionImage.js"></script>
+    <script src="js/directives/imageLoader.js"></script>
+    <script src="js/directives/rotateImages.js"></script>
+
+    <script src="js/controllers/AppCtrl.js"></script>
+    <script src="js/controllers/HomeCtrl.js"></script>
+    <script src="js/controllers/ProjectsCtrl.js"></script>
+    <script src="js/controllers/ProjectDetailCtrl.js"></script>
+    <script src="js/controllers/TeamCtrl.js"></script>
+    <script src="js/controllers/LoveCtrl.js"></script>
+    <script src="js/controllers/ErrorCtrl.js"></script>
+    <script src="js/controllers/LegacyCtrl.js"></script>
+
 </head>
 
 <body id="body" ng-controller="AppCtrl">
